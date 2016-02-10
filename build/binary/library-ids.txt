@@ -1,0 +1,12 @@
+C:\Users\David Torrez\Documents\Alcaldia POS\Alcaldia\lib\floggy-persistence-framework.jar=12
+C:\Users\David Torrez\Documents\Alcaldia POS\Alcaldia\lib\kxml2-2.3.0.jar=10
+C:\Users\David Torrez\Documents\Alcaldia POS\Alcaldia\lib\microlog-logger-core-2.3.5.jar=8
+C:\Users\David Torrez\Documents\Alcaldia POS\Alcaldia\lib\microlog-logger-midp-2.3.5.jar=11
+C:\Users\David Torrez\Documents\Alcaldia POS\Alcaldia\lib\microlog-logger-midp-file-2.3.5.jar=9
+C:\Users\David Torrez\Documents\Alcaldia POS\Alcaldia\lib\netbeans_midp_components_basic.jar=7
+C:\Users\David\Documents\Alcaldia POS\Alcaldia\lib\floggy-persistence-framework.jar=6
+C:\Users\David\Documents\Alcaldia POS\Alcaldia\lib\kxml2-2.3.0.jar=4
+C:\Users\David\Documents\Alcaldia POS\Alcaldia\lib\microlog-logger-core-2.3.5.jar=2
+C:\Users\David\Documents\Alcaldia POS\Alcaldia\lib\microlog-logger-midp-2.3.5.jar=5
+C:\Users\David\Documents\Alcaldia POS\Alcaldia\lib\microlog-logger-midp-file-2.3.5.jar=3
+C:\Users\David\Documents\Alcaldia POS\Alcaldia\lib\netbeans_midp_components_basic.jar=1

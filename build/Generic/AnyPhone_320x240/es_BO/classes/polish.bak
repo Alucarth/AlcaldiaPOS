@@ -1,0 +1,513 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Mozilla Joey.
+ *
+ * The Initial Developer of the Original Code is
+ * Michael Koch.
+ * Portions created by the Initial Developer are Copyright (C) 2007
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+/*
+ * colors that are being reused.
+ */
+colors {
+	joeyGreen: #B5D623;
+	yellowgreen: #ADFF2F;
+
+	fontColor: black;
+	titleColor: white;
+	bgColorFocused: white;
+	borderColorFocused: joeyGreen;
+	
+	bgColor: black;
+	bgColorInput: gray;
+	bgColorInputFocused: white;
+	
+	borderColorInput: gray;
+	borderColorInputFocused: white;
+	
+	textColor: white;
+	textColorFocused: joeyGreen;
+	textColorInput: black;
+	textColorInputFocused: joeyGreen;
+	
+	bgColorCommands: black;
+
+	fontShadowColor: gray;
+	focusedBackgroundColor: white;
+	focusedBorderColor: black;
+}
+
+/*
+ * backgrounds used on several screens
+ */
+backgrounds {
+	buttonFocusedBackground {
+		type: round-rect;
+		color: bgColorFocused;
+		border-color: borderColorFocused;
+	}
+}
+
+/*
+ * borders used on several screens
+ */
+borders {
+	buttonBorder {
+		type: round-rect;
+		color: gray;
+	}	
+}
+
+focused {
+	background-color: bgColorFocused;
+}
+
+.screenTitle {
+	padding-left: 2;
+	padding: 1;
+	font-face: proportional;
+	font-size: large;
+	font-style: bold;
+	font-color: titleColor;
+	border: none;
+	layout: left | horizontal-expand;
+	background-color: joeyGreen;
+}
+
+.inputScreen {
+	padding: 0;
+	title-style: screenTitle;
+	background-color: black;
+}
+
+.loginScreen extends inputScreen {
+	/*
+	layout: vertical-center | vertical-expand;
+	*/
+}
+
+.mainmenuScreen extends inputScreen {
+}
+
+.snapshotScreen extends inputScreen {
+}
+
+.uploadScreen extends inputScreen {
+}
+
+.detailsScreen extends inputScreen {
+}
+
+.rssItemScreen extends inputScreen {
+}
+
+.rssUploadItem {
+	padding: 1;
+	border-width: 1;
+    columns: 2;
+	layout: expand;
+}
+
+.rssUploadItem:hover {
+	background {
+		color: bgColorFocused;
+	}
+}
+
+.uploadItem {
+	padding: 1;
+	border-width: 1;
+	layout: expand | left;
+	background-color: black;
+	font-color: white;
+	
+	border {
+		type: bottom;
+		width: 1;
+		color: white;
+	}
+}
+
+.uploadItem:hover {
+	font-color: joeyGreen;
+}
+
+.imagecontent extends uploadItem {
+}
+
+.input {
+	/*
+	background {
+		color: bgColorInput;
+		border-color: borderColorInput;
+	}
+	*/
+	margin: 3;
+	padding: 2;
+	padding-left: 9;
+	padding-right: 9;
+	background-color: #656565;
+	layout: expand;
+	label-style: inputLabel;
+
+	font {
+		style: bold;
+		size: small;
+		color: textColorInput;
+	}
+}
+
+.input:hover {
+	/*
+	background {
+		color: bgColorInputFocused;
+		border-color: borderColorInputFocused;
+	}
+	*/
+
+	margin: 0;
+	background-color: white;
+	font-color: textColorInputFocused;
+
+	border {
+		type: drop-shadow;
+		inner-color: #888D8D67;
+		outer-color: #222D2D25;
+		width: 3;
+		orientation: all-sides;
+	}
+}
+
+.inputLabel {
+	margin-left: 3;
+	font-color: white;
+	font-style: bold;
+	layout: left | newline-after;
+}
+
+.checkbox {
+	font-color: textColor;
+	/*
+	layout: top;
+	*/
+	margin-left: 3;
+	checkbox-plain: url( checkbox-unselected.png );
+	checkbox-selected: url( checkbox-selected.png );
+	text-horizontal-adjustment: 2;
+}
+
+.checkbox:hover {
+	font-color: joeyGreen;
+	checkbox-plain: url( checkbox-focused-unselected.png );
+	checkbox-selected: url( checkbox-focused-selected.png );
+}
+
+.checkbutton {
+	padding: 2;
+}
+
+.radiobox {
+	view-type: exclusive-single-line;
+	exclusiveview-arrow-color: black;
+	exclusiveview-arrow-position: bothsides;
+	exclusiveview-arrow-padding: 2;
+	/*
+	exclusiveview-left-arrow: url( arrowLeftS.png );
+	exclusiveview-right-arrow: url( arrowRightS.png );
+	*/
+	exclusiveview-roundtrip: true;
+	exclusiveview-expand-background: true;
+	/*
+	//#if !polish.ScreenWidth:defined
+		min-width: 60;
+	//#else
+		min-width: ${polish.ScreenWidth} * 2 / 3 - 30;
+	//#endif
+	*/
+	layout: expand | newline-before;
+	padding: 2;
+	font-color: textColorInput;
+	font-style: bold;
+	label-style: inputLabel;
+
+	background {
+		color: bgColorInput;
+		border-color: borderColorInput;
+	}
+}
+
+.radiobox:hover {
+	padding: 2;
+	layout: expand;
+	exclusiveview-arrow-color: joeyGreen;
+
+	/*
+	font-color: textColorInputFocused;
+	background-color: red;
+	*/
+	
+	background {
+		color: bgColorInputFocused;
+		border-color: borderColorInputFocused;
+	}
+}
+
+.radiobutton {
+	font-color: textColorInput;
+}
+
+.radiobutton:hover {
+	font-color: textColorInputFocused;
+}
+
+.textcontent {
+	padding: 2;
+	font-size: small;
+	font-color: white;
+	layout: expand;
+	background-color: black;
+}
+
+.browser {
+	font-size: small;
+}
+
+menubar {
+	background-color: white;
+}
+
+menu {
+	/*
+	menubar-color: white;
+	*/
+	margin-bottom: -4; /* for the border */
+	min-width: 100;
+	padding: 2;
+	font-color: textColorInputFocused;
+	font-size: small;
+	/*
+	view-type: slide-up;
+	*/
+	background-color: #2d2d2d;
+	
+	border {
+		type: drop-shadow;
+		width: 4;
+		start-color: #aeee;
+		end-color: #2222;
+		orientation: top-right;
+	}
+}
+
+menuItem {
+    padding: 2;
+    padding-left: 4;
+    padding-right: 4;
+    layout: left;
+    font {
+    	/*
+        color: fontColor;
+        */
+        color: white;
+        size: large;
+        style: bold;
+    }
+    //#if ${ exists( arrowRight.png ) }
+        command-child-indicator: url(arrowRight.png);
+    //#else
+        command-child-indicator-color: blue;
+        command-child-indicator-width: 8;
+        command-child-indicator-height: 10;
+   //#endif
+}
+
+.menuItem:hover {
+	background-color: #242424;
+    layout: left | horizontal-expand;
+	/*
+    background {
+        type: round-rect;
+        color: focusedBackgroundColor;
+        border-color: focusedBorderColor;
+    }
+    */
+    font {
+        style: bold;
+        size: large;
+        color: textColorInputFocused;
+    }
+}
+
+leftcommand {
+	font-style: bold;
+	font-color: joeyGreen;
+}
+
+rightcommand extends leftcommand {
+	layout: right;
+}
+
+.mainmenuentry {
+	padding: 5;
+	layout: center | expand;
+	font {
+		color: textColor;
+		size: large;
+		style: bold;
+	}
+	border {
+		type: bottom;
+		color: white;
+		width: 1;
+	}
+}
+
+.mainmenuentry:hover {
+	font-color: textColorFocused;
+}
+
+.alertConfirmation {
+	padding: 10;
+	layout: vertical-shrink | horizontal-shrink | bottom | center;
+	repaint-previous-screen: true;
+	font-color: black;
+	background {
+		type: round-rect;
+		color: bgColorFocused;
+	}
+}
+
+.alertError extends alertConfirmation {
+}
+
+alertWait {
+    repaint-previous-screen: true;
+    font-size: large;
+    font-color: white;
+    padding: 5;
+    layout: vertical-expand | horizontal-expand | vcenter | center;
+
+    background {
+    	/*
+        type: round-rect;
+        */
+        color: black;
+    }
+}
+
+alertcontent {
+    font-size: large;
+    font-color: black;
+    font-style: bold;
+    layout: top;
+}
+
+.gaugeWait {
+	layout: center;
+    view-type: gauge-cycling-icons;
+    gauge-cycling-icons-count: 8;
+    gauge-cycling-icons-interval: 500;
+    gauge-cycling-icons-highlight-count: 3;
+    gauge-cycling-icons-image: gauge3.png;
+    gauge-cycling-icons-highlight-image: gauge2.png;
+    gauge-cycling-icons-highlight-center-image: gauge1.png;
+ }
+
+button {
+	margin-left: 3;
+	padding: 2;
+	border: buttonBorder;
+	font-color: white;
+	font-style: bold;
+}
+
+button:hover {
+	background: buttonFocusedBackground;
+	font-color: joeyGreen;
+}
+
+commandsarea {
+	background-color: bgColorCommands;
+	/*
+	layout: right;
+	layout: center;
+	*/
+
+	view-type: horizontal-choice;
+	horizontalview-roundtrip: true;
+    horizontalview-arrow-position: none;
+}
+
+commandsarea:hover {
+	background-color: bgColorCommands;
+}
+
+commandsitem {
+	background-color: bgColorCommands;
+}
+
+commandsitem:hover {
+	background-color: yellowgreen;
+}
+
+
+.rssDescriptionAlert {
+	font-size: small;
+}
+
+.browserText {
+	font-size: small;
+}
+
+.browserLink {
+	font-size: small;
+	font-color: textColorInput;
+}
+
+.openLink {
+	font-size: small;
+	font-color: textColorInput;
+}
+
+
+textfield {
+	padding: 2;
+	layout: left | horizontal-expand;
+	background {
+		type: simple;
+		color: white;
+	}
+        border {
+		type: simple;
+		color: #000000;
+		border-width: 1;
+	}
+        
+        
+}
+
+textfield:hover {
+	padding: 1;
+	border {
+		type: simple;
+		color: #000000;
+		border-width: 1;
+	}
+}
+
