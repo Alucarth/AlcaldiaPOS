@@ -7,6 +7,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.ipx.http.ConectorRest;
 import com.ipx.http.Conexion;
+import com.ipx.http.ConexionIpx;
 import com.ipx.http.Rest;
 import com.ipx.http.switchDisplay;
 import com.ipx.json.Autentificacion;
@@ -18,15 +19,11 @@ import com.ipx.json.ConsultaDatos;
 import com.ipx.json.Cuenta;
 import com.ipx.json.Factura;
 import com.ipx.json.Inf;
-import com.ipx.json.Infraccion;
-import com.ipx.json.Infraccion_1;
 import com.ipx.json.InvoiceItems;
-import com.ipx.json.ListaUsuarios;
-
 import com.ipx.json.Products;
 import com.ipx.json.RecargaPos;
 import com.ipx.json.RegistroCliente;
-import com.ipx.json.Usuarios;
+
 import com.ipx.json.Vehiculo;
 import com.ipx.json.Zona;
 import com.ipx.json.solicitudFactura;
@@ -34,11 +31,14 @@ import com.ipx.util.BmpArray;
 import com.ipx.util.CharUtil;
 import com.ipx.util.CodigoDeControl;
 import com.ipx.util.DateUtil;
+import com.ipx.util.Log;
 import com.ipx.util.Numero_a_Letra;
 import com.ipx.util.Tokenizer;
 import com.mobiwire.print.DeviceOps;
 import com.nbbse.printer.Printer;
 import com.sagereal.utils.BMPGenerator;
+import david.torrez.salinas.Infraccion;
+import david.torrez.salinas.Usuario;
 import de.enough.polish.io.RmsStorage;
 import de.enough.polish.ui.*;
 //import de.enough.polish.ui.TableItem;
@@ -59,7 +59,6 @@ import javax.microedition.rms.RecordStore;
 import net.sf.microlog.core.Logger;
 import net.sf.microlog.core.LoggerFactory;
 import net.sf.microlog.core.PropertyConfigurator;
-
 import org.netbeans.microedition.util.SimpleCancellableTask;
 
 
@@ -87,30 +86,17 @@ public class StartApp extends MIDlet implements CommandListener {
        
  
     //datos Cuenta
-    private String llave;
-    private Cuenta cuenta;
+   
     private Printer imprimir;
     private Vector listaProductos;
-    private TableItem table;
-    private TableData data;
-    private String usuario;
-    private int numMemo=751;
-    TableItem tp;
-    int z=0;
+    
+   
    //variable de envio Rest
  
-    private Conexion conexion;
+    private ConexionIpx conexion;
   
-    private ConsultaCliente cc;
-    private Codigo c;
-    private RecargaPos rp;
-    // varibales para impresion
-    private Hashtable lp;
-    
-    private String ip = "198.199.75.179";
-    private Gauge gau;
-    //flags 
- 
+  
+  
 
     private int pantalla;
     private Rest rest;
@@ -127,132 +113,59 @@ public class StartApp extends MIDlet implements CommandListener {
     static final String REC_STORE = "MIrms";
     //variable para el filtro
     
-    private FilteredList filtro,zona,vehiculos;
     private Command okZona;
 //    private Infraccion infraccion;
     private Autentificacion autentificacion;
-    private ConsultaDatos consulta;
-    private ListaUsuarios usuarios;
+
+    
     
     private Vector vectorVehiculo,vectorZona,vectorColores,vectorUsuarios;
 //    private final Vector vectorUsuarios;
     private Command okVehiculo,backVehiculo;
     private ChoiceGroup group;
     private final int vV=0,vC=1,vZ=2;
-    private Inf infcon;
-    private Infraccion_1 infraccion;
+
+    public Usuario usuario;
+    public Vector listaInfracciones;
+
 //    private Thread t;
 //<editor-fold defaultstate="collapsed" desc=" Generated Fields ">//GEN-BEGIN:|fields|0|
-    private Command okOpciones;
-    private Command okCliente;
-    private Command okLista;
-    private Command backMenu;
-    private Command okCommand;
-    private Command okCommand2;
-    private Command okCommand1;
-    private Command ImprimirFactura;
-    private Command okCommand8;
-    private Command stopCommand;
-    private Command backCommand2;
-    private Command okCommand9;
-    private Command screenCommand;
-    private Command cancelCommand1;
-    private Command cancelCommand2;
-    private Command back;
-    private Command okRegistrar;
-    private Command backDatos;
-    private Command okDatos;
-    private Command okMenu;
-    private Command cancelCommand;
-    private Command backSalir;
-    private Command okSelOp;
-    private Command backFactura;
-    private Command backCliente;
-    private Command okCommand4;
-    private Command okCommand3;
-    private Command backCommand;
-    private Command okCommand5;
-    private Command okCommand6;
-    private Command backCommand1;
-    private Command okCommand7;
-    private Command okCommand25;
-    private Command okCommand24;
-    private Command okCommand23;
-    private Command okCommand22;
     private Command okLogin;
-    private Command okCommand21;
-    private Command okCommand20;
-    private Command okCommand29;
     private Command okCommand28;
-    private Command okCommand27;
-    private Command okCommand26;
     private Command exitCommand;
-    private Command okCommand13;
-    private Command okCommand14;
-    private Command okCommand12;
-    private Command okProducto;
-    private Command okCommand10;
-    private Command okCommand11;
-    private Command okFiltro;
-    private Command okFil;
-    private Command okCommand18;
-    private Command okCommand19;
-    private Command okCommand16;
-    private Command okCommand17;
-    private Command exitCommand1;
-    private Command okCommand15;
-    private Command backProducto;
-    private Command okCommand30;
-    private Command backCommand4;
+    private Command okBorrar;
+    private Command stopCommand;
     private Command backCommand3;
-    private Command okCommand31;
+    private Command cancelCommand;
+    private Command okCommand4;
+    private Command backCommand1;
+    private Command okCommand1;
+    private Command screenCommand;
+    private Command backCommand2;
+    private Command okAdicionar;
+    private Command back;
+    private Command okCommand2;
+    private Command okMenu;
+    private Command exitCommand1;
+    private Command okCommand;
+    private Command backCommand;
     private SplashScreen splashScreen;
-    private List listLugar;
-    private List lista;
-    private Form formLoading;
-    private Form formRegistro;
-    private TextField txtEmailCli;
-    private TextField txtTelCli;
-    private TextField txtNomCli;
-    private TextField txtNitCli;
-    private List listMenu;
-    private Alert Problemas;
-    private Form formInfraccion;
-    private TextField textField3;
-    private TextField textField2;
-    private TextField textField4;
-    private List listVehiculo;
-    private Form formVehiculo;
-    private TextField textField1;
-    private TextField textField;
-    private TextField textField13;
-    private TextField textField11;
-    private TextField textField12;
     private Form formLogin;
     private TextField textField9;
     private TextField textField10;
-    private Form formConductor;
-    private TextField textField6;
-    private TextField textField7;
-    private TextField textField8;
-    private TextField textField5;
-    private Form formAgenda;
-    private TextField txt1;
-    private TextField txt2;
-    private TextField txt3;
-    private List listAdministrador;
+    private List list;
+    private Form formLoading;
+    private List listSeleccionados;
+    private Form form;
+    private List listMenu;
+    private Form formInfractor;
+    private TextField txtRuta;
+    private TextField txtPlaca;
+    private TextField textField;
+    private TextField txtCI;
+    private Form formGMT;
+    private Alert Problemas;
     private Image image;
-    private Image image2;
-    private Image image11;
-    private Ticker tickerLogin;
-    private Image image12;
-    private Image image1;
-    private Image image4;
-    private Image image3;
-    private Image image10;
-    private Image image5;
-    private Image image6;
-    private Image image7;
     private Ticker ticker;
     private SimpleCancellableTask task1;
     private Image image9;
@@ -261,9 +174,20 @@ public class StartApp extends MIDlet implements CommandListener {
     private Image image13;
     private Image image14;
     private Image image15;
+    private Image image2;
+    private Image image11;
+    private Ticker tickerLogin;
+    private Image image12;
+    private Image image1;
     private SimpleCancellableTask task2;
+    private Image image4;
+    private Image image3;
+    private Image image10;
     private Ticker ticker1;
     private Font font;
+    private Image image5;
+    private Image image6;
+    private Image image7;
 //</editor-fold>//GEN-END:|fields|0|
 
     //SMS ENVIO
@@ -335,11 +259,7 @@ public class StartApp extends MIDlet implements CommandListener {
         listaProductos = new Vector();
 //       vectorUsuarios = new Vector();
 
-        rest = new Rest();
-        
-        conexion = new Conexion(rest);
-        conexion.start();
-        
+       
         
 //        String version =conexion.getRespuesta();
 }//GEN-BEGIN:|0-initialize|2|
@@ -413,358 +333,100 @@ switchDisplayable(null, getSplashScreen());//GEN-LINE:|3-startMIDlet|1|3-postAct
 //GEN-END:|7-commandAction|0|7-preCommandAction
         // write pre-action user code here
 
-        if (displayable == formAgenda) {//GEN-BEGIN:|7-commandAction|1|1319-preAction
-            if (command == okCommand15) {//GEN-END:|7-commandAction|1|1319-preAction
+        if (displayable == formGMT) {//GEN-BEGIN:|7-commandAction|1|1475-preAction
+            if (command == backCommand1) {//GEN-END:|7-commandAction|1|1475-preAction
  // write pre-action user code here
-        //gaurdando a la base de datos 
-//        Persona p = new Persona();
-//        p.setNombre(txt1.getString());
-//        p.setNumero(txt2.getString());
-//        txt3.setText("haber hasta aqui its work:");
-        openRecStore();
-        writeRecord(txt1.getText()+";"+txt2.getText());
-        
-        
-      
-        closeRecStore();
-        
-        
-//        try {
-//        PersistableManager pm = PersistableManager.getInstance();
-//        txt3.setText("se esta guardando el dato:");
-//        // A new object ID is generated.
-//        // You can use it in future operations.
-//        int id = pm.save(p);
-//        txt3.setText("id guardado: "+id);
-//    
-//} catch (FloggyException e) {
-//    System.out.print("Error al guardar dato: "+e.toString());
-//        
-//}
-
-
-
-//GEN-LINE:|7-commandAction|2|1319-postAction
+switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|2|1475-postAction
  // write post-action user code here
-} else if (command == okCommand17) {//GEN-LINE:|7-commandAction|3|1325-preAction
+} else if (command == okCommand1) {//GEN-LINE:|7-commandAction|3|1473-preAction
  // write pre-action user code here
-//    Persona persona = new Persona();
-//
-//try {
-//        PersistableManager pm = PersistableManager.getInstance();
-//
-//        /* To load an object, use the object ID 
-//         * generated previously by the save() operation.
-//         */
-//        System.out.print("se esta recuperando  el dato:");
-//        pm.load(persona, Integer.parseInt(txt3.getString()));
-//        txt1.setText(persona.getNombre());
-//        txt2.setText(persona.getNumero());
-//} catch (FloggyException e) {
-//       System.out.print("Error al guardar dato: "+e.toString());
-//}
-    openRecStore();
-        readRecords();
-        
-        
-      
-        closeRecStore();
-    
-//GEN-LINE:|7-commandAction|4|1325-postAction
+switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|4|1473-postAction
  // write post-action user code here
-} else if (command == okCommand18) {//GEN-LINE:|7-commandAction|5|1331-preAction
+}//GEN-BEGIN:|7-commandAction|5|1467-preAction
+        } else if (displayable == formInfractor) {
+            if (command == backCommand) {//GEN-END:|7-commandAction|5|1467-preAction
  // write pre-action user code here
-    CodigoDeControl cd = new CodigoDeControl();
-//    String nuevaCad;
-//        nuevaCad = ""+cd.getVerhoeff(txt1.getString());
-//    txt3.setText(nuevaCad);
-//    int n = Integer.parseInt(txt1.getString());
-//    txt2.setText(cd.inToHex(n));
-      String m, l;
-      m ="d3Ir6";
-      l = "sesamo";
-    
-//    char car[] = txt2.getString().toCharArray();
-//    String c="";
-//    for(int i =0;i<car.length;i++)
-//    {
-//            c=c+","+CharUtil.CharToASCII(car[i]);
-//    }
-//    txt3.setText(cd.getRC4("d3Ir6","sesamo"));
-    txt3.setText(cd.getRC4(m, l));
-//    txt3.setText(""+cd.cambiar(txt1.getText().toCharArray(), txt2.getText().toCharArray(), "hola mundo Xd"));
-    
-                                              
+switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|6|1467-postAction
  // write post-action user code here
-//        char[] c1 = txt1.getString().toCharArray();
-//        char[] c2 = txt2.getString().toCharArray();
-//            
-//        
-//        String nc="";
-//        char [] caracteres = "Hola mundo Xd lalala".toCharArray();
-//         for (int i = 0; i < caracteres.length; i++) {
-//             nc = nc+" "+caracteres[i];
-//          }   
-////        nuevaCad = cd.cambiar(c2[0],c1[0],"hola mundo XD");
-////        txt3.setText(nuevaCad);
-//         txt3.setText(nc);
-//         String texto = txt3.getText();
-//        
-//         char[] caracter = txt1.getString().toCharArray();
-//         txt2.setText(cd.getInvierteNumero("Hola mundo Xd lalala"));
-//    txt3.setText(""+cd.cambiar(txt1.getText().toCharArray(), txt2.getText().toCharArray(), "hola mundo Xd"));
-    
-//GEN-LINE:|7-commandAction|6|1331-postAction
- // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|7|1393-preAction
-        } else if (displayable == formConductor) {
-            if (command == okCommand27) {//GEN-END:|7-commandAction|7|1393-preAction
+} else if (command == okCommand) {//GEN-LINE:|7-commandAction|7|1465-preAction
  // write pre-action user code here
-                infcon.setCi(textField8.getText());
-                infcon.setNombre(textField6.getText());
-                infcon.setApaterno(textField7.getText());
-                infcon.setAmaterno(textField5.getText());
-                switchDisplayable(null, getFormInfraccion());//GEN-LINE:|7-commandAction|8|1393-postAction
+switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|8|1465-postAction
  // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|9|1407-preAction
-        } else if (displayable == formInfraccion) {
-            if (command == ImprimirFactura) {//GEN-END:|7-commandAction|9|1407-preAction
- // write pre-action user code here
-//                infraccion.setCodinfracion(textField2.getText());
-//                infraccion.setCodgravamen(textField3.getText());
-                  infcon.setInf1(textField2.getText());
-                  infcon.setInf2(textField4.getText());
-                  infcon.setCodGrav(textField3.getText());                  
-                  infcon.setCodUser(autentificacion.getUserCod());
-                  
-//                Imprimir(infraccion);
-//                try {
-////                        factura = new Factura(rest.getRespuesta());
-////                        
-//                        javax.microedition.lcdui.Image ImagenQr=ImprimirQr(infraccion);
-//                        BmpArray ba = new BmpArray();
-//                        byte imagen[] =  ba.readImage(BMPGenerator.encodeBMP(ImagenQr));
-//                        Imprimir(infraccion,imagen);
-////                        cambiarPantalla();
-//                    } catch (IOException ex) {
-//                        ex.printStackTrace();
-//                    }   
-                  
-                methodInfraccion();//GEN-LINE:|7-commandAction|10|1407-postAction
- // write post-action user code here
-                  
-                         
-            }//GEN-BEGIN:|7-commandAction|11|1244-preAction
-        } else if (displayable == formLoading) {
-            if (command == cancelCommand2) {//GEN-END:|7-commandAction|11|1244-preAction
-                // write pre-action user code here
-                retornarPantalla();
-                
-                
-//GEN-LINE:|7-commandAction|12|1244-postAction
-                // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|13|1400-preAction
+}//GEN-BEGIN:|7-commandAction|9|1461-preAction
         } else if (displayable == formLogin) {
-            if (command == okCommand28) {//GEN-END:|7-commandAction|13|1400-preAction
+            if (command == exitCommand1) {//GEN-END:|7-commandAction|9|1461-preAction
  // write pre-action user code here
-methodLogin();//GEN-LINE:|7-commandAction|14|1400-postAction
+exitMIDlet();//GEN-LINE:|7-commandAction|10|1461-postAction
  // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|15|1255-preAction
-        } else if (displayable == formRegistro) {
-            if (command == back) {//GEN-END:|7-commandAction|15|1255-preAction
+} else if (command == okCommand28) {//GEN-LINE:|7-commandAction|11|1400-preAction
  // write pre-action user code here
-//GEN-LINE:|7-commandAction|16|1255-postAction
+methodLogin();//GEN-LINE:|7-commandAction|12|1400-postAction
  // write post-action user code here
-} else if (command == okRegistrar) {//GEN-LINE:|7-commandAction|17|1253-preAction
+}//GEN-BEGIN:|7-commandAction|13|1493-preAction
+        } else if (displayable == list) {
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|13|1493-preAction
  // write pre-action user code here
-//GEN-LINE:|7-commandAction|18|1253-postAction
+listAction();//GEN-LINE:|7-commandAction|14|1493-postAction
  // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|19|1421-preAction
-        } else if (displayable == formVehiculo) {
-            if (command == back) {//GEN-END:|7-commandAction|19|1421-preAction
+} else if (command == backCommand3) {//GEN-LINE:|7-commandAction|15|1503-preAction
  // write pre-action user code here
-switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|20|1421-postAction
+switchDisplayable(null, getListSeleccionados());//GEN-LINE:|7-commandAction|16|1503-postAction
  // write post-action user code here
-} else if (command == okCommand21) {//GEN-LINE:|7-commandAction|21|1354-preAction
+} else if (command == okCommand4) {//GEN-LINE:|7-commandAction|17|1497-preAction
  // write pre-action user code here
-    infcon.setPlacaLit(textField.getText());
-    infcon.setPlacaNum(textField1.getText());
-    infcon.setVia(textField11.getText());
-    infcon.setCalle(textField12.getText());
-    infcon.setLineaDesc(textField13.getText());
-                switchDisplayable(null, getListVehiculo());//GEN-LINE:|7-commandAction|22|1354-postAction
-//  write post-action user code here
-//infraccion.setPlaca(textField.getText()+"-"+textField1.getText());
-}//GEN-BEGIN:|7-commandAction|23|1433-preAction
-        } else if (displayable == listAdministrador) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|23|1433-preAction
-                // write pre-action user code here
-listAdministradorAction();//GEN-LINE:|7-commandAction|24|1433-postAction
-                // write post-action user code here
-} else if (command == backCommand4) {//GEN-LINE:|7-commandAction|25|1458-preAction
-                // write pre-action user code here
-switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|26|1458-postAction
-                // write post-action user code here
-} else if (command == okCommand31) {//GEN-LINE:|7-commandAction|27|1452-preAction
-                // write pre-action user code here
-listAdministradorAction();//GEN-LINE:|7-commandAction|28|1452-postAction
-                // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|29|1125-preAction
-        } else if (displayable == listLugar) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|29|1125-preAction
-                // write pre-action user code here
-listLugarAction();//GEN-LINE:|7-commandAction|30|1125-postAction
-                // write post-action user code here
-} else if (command == backMenu) {//GEN-LINE:|7-commandAction|31|1133-preAction
-                // write pre-action user code here
-switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|32|1133-postAction
-                
-//                strProductos.setText("entro");
-//                String p="lista de Items:\nCANT CONCEPTO      BS";
-//                double total=0;
-//                for (int i=0;i<listaProductos.size();i++)
-//                {
-//                    Products pro = (Products) listaProductos.elementAt(i);
-//                    p = p +"\n "+Double.parseDouble(pro.getQty())+" "+pro.getNotes()+" "+(Double.parseDouble(pro.getCost())*Double.parseDouble(pro.getQty()));
-//                    total = total + (Double.parseDouble(pro.getCost())*Double.parseDouble(pro.getQty()));
-//                    
-//                }
-//                strProductos.setText(p);
-////                strProductos.setText(""+total);
-//                strTotal.setText(""+total);
-                
-                // write post-action user code here
-} else if (command == okCommand4) {//GEN-LINE:|7-commandAction|33|1192-preAction
-                // write pre-action user code here
-                    switchDisplayable(null, getFormVehiculo());
-//                   listaProductos.removeElementAt(listLugar.getSelectedIndex());
-//                   listLugar.delete(listLugar.getSelectedIndex());
-//GEN-LINE:|7-commandAction|34|1192-postAction
-                // write post-action user code here
-} else if (command == okOpciones) {//GEN-LINE:|7-commandAction|35|1127-preAction
-                // write pre-action user code here
-                    //Cambiando a la pantalla lugar donde se cometio la infraccion
-                    if(getListLugar().getSelectedIndex() ==0)
-                    {
-                        switchDisplayable(null, getFiltro()); 
-                    }
-                    if(getListLugar().getSelectedIndex()==1)
-                    {
-                        switchDisplayable(null, getZona()); 
-                    }
-                
-//GEN-LINE:|7-commandAction|36|1127-postAction
-                // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|37|1155-preAction
+    
+    
+                switchDisplayable(null, getListSeleccionados());//GEN-LINE:|7-commandAction|18|1497-postAction
+ // write post-action user code here
+//adicionando infracciones a la lista de infracciones
+    Infraccion infraccion =(Infraccion) usuario.getInfracciones().elementAt(getList().getSelectedIndex());
+    getListaInfracciones().addElement(infraccion);
+    getListSeleccionados().append(infraccion.getCodigo(),null);
+            }//GEN-BEGIN:|7-commandAction|19|1155-preAction
         } else if (displayable == listMenu) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|37|1155-preAction
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|19|1155-preAction
                 // write pre-action user code here
-listMenuAction();//GEN-LINE:|7-commandAction|38|1155-postAction
+listMenuAction();//GEN-LINE:|7-commandAction|20|1155-postAction
                 // write post-action user code here
-} else if (command == backSalir) {//GEN-LINE:|7-commandAction|39|1166-preAction
+} else if (command == okMenu) {//GEN-LINE:|7-commandAction|21|1161-preAction
                 // write pre-action user code here
-switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|40|1166-postAction
-             
+listMenuAction();//GEN-LINE:|7-commandAction|22|1161-postAction
                 // write post-action user code here
-} else if (command == okMenu) {//GEN-LINE:|7-commandAction|41|1161-preAction
-                // write pre-action user code here
-listMenuAction();//GEN-LINE:|7-commandAction|42|1161-postAction
-                // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|43|1359-preAction
-        } else if (displayable == listVehiculo) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|43|1359-preAction
+}//GEN-BEGIN:|7-commandAction|23|1483-preAction
+        } else if (displayable == listSeleccionados) {
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|23|1483-preAction
  // write pre-action user code here
-listVehiculoAction();//GEN-LINE:|7-commandAction|44|1359-postAction
+listSeleccionadosAction();//GEN-LINE:|7-commandAction|24|1483-postAction
  // write post-action user code here
-} else if (command == okCommand22) {//GEN-LINE:|7-commandAction|45|1365-preAction
+} else if (command == backCommand2) {//GEN-LINE:|7-commandAction|25|1488-preAction
  // write pre-action user code here
-switchDisplayable(null, getFormConductor());//GEN-LINE:|7-commandAction|46|1365-postAction
+switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|26|1488-postAction
  // write post-action user code here
-} else if (command == okCommand29) {//GEN-LINE:|7-commandAction|47|1403-preAction
+} else if (command == okAdicionar) {//GEN-LINE:|7-commandAction|27|1486-preAction
  // write pre-action user code here
-    
-    switch(getListVehiculo().getSelectedIndex())
-    {
-        case 0:  switchDisplayable(null, getVehiculos());break;
-        case 1:  switchDisplayable(null, getLista()); break; 
-        case 2: switchDisplayable(null,getZona()); break;
-    }
-//    /*
-//    if(lista.getSelectedIndex()==1)
-//    {
-    /*
-switchDisplayable (null, getLista ());//GEN-BEGIN:|7-commandAction|48|1403-postAction
-//GEN-END:|7-commandAction|48|1403-postAction
- */
-    
-  
-//e post-action user code here
-}//GEN-BEGIN:|7-commandAction|49|1043-preAction
-        } else if (displayable == lista) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|49|1043-preAction
-                // write pre-action user code here
-listaAction();//GEN-LINE:|7-commandAction|50|1043-postAction
-                // write post-action user code here
-} else if (command == backCommand) {//GEN-LINE:|7-commandAction|51|1194-preAction
-                // write pre-action user code here
-switchDisplayable(null, getListVehiculo());//GEN-LINE:|7-commandAction|52|1194-postAction
-                // write post-action user code here
-} else if (command == okLista) {//GEN-LINE:|7-commandAction|53|1117-preAction
-                // write pre-action user code here
-                String taux = lista.getString(lista.getSelectedIndex());
-                Buscar(taux,vectorColores,1);
-                getListVehiculo().set(1, "Color:"+taux, null);
-                
-                switchDisplayable(null, getListVehiculo());//GEN-LINE:|7-commandAction|54|1117-postAction
-                // write post-action user code here
-                 
-//                 getListVehiculo().
-//                 if(getListVehiculo().getSelectedIndex()==0)
-//                 {
-//                     getListVehiculo().set(getListVehiculo().getSelectedIndex(), "Tipo de Vehiculo:"+taux, null);
-//                 }
-                 
-                    
-               
-//                 if (getListVehiculo().)
-//                txtCant.setText("");
-                
-            }//GEN-BEGIN:|7-commandAction|55|24-preAction
+switchDisplayable(null, getList());//GEN-LINE:|7-commandAction|28|1486-postAction
+ // write post-action user code here
+} else if (command == okBorrar) {//GEN-LINE:|7-commandAction|29|1490-preAction
+ // write pre-action user code here
+    getListaInfracciones().removeElementAt(getListSeleccionados().getSelectedIndex());
+    getListSeleccionados().delete(getListSeleccionados().getSelectedIndex());
+//GEN-LINE:|7-commandAction|30|1490-postAction
+ // write post-action user code here
+}//GEN-BEGIN:|7-commandAction|31|24-preAction
         } else if (displayable == splashScreen) {
-            if (command == SplashScreen.DISMISS_COMMAND) {//GEN-END:|7-commandAction|55|24-preAction
+            if (command == SplashScreen.DISMISS_COMMAND) {//GEN-END:|7-commandAction|31|24-preAction
                 // write pre-action user code here
-switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|56|24-postAction
+switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|32|24-postAction
                 // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|57|7-postCommandAction
-        }//GEN-END:|7-commandAction|57|7-postCommandAction
-        else if (command == okFiltro) {
-                                
-//                              retornarPantalla();
-                    getListLugar().set(getListLugar().getSelectedIndex(), "Nombre de la via:"+getFiltro().getString(getFiltro().getSelectedIndex()),null);
-//                    infraccion.setNomvia(getFiltro().getString(getFiltro().getSelectedIndex()));
-                    
-                    switchDisplayable(null,getListLugar());
-//                               
-        }
-        else if (command == okZona) {
-                                
-//                              retornarPantalla();
-                Buscar(getZona().getString(getZona().getSelectedIndex()),vectorZona,2);
-                    getListVehiculo().set(2, "Zona:"+getZona().getString(getZona().getSelectedIndex()),null);
-                                switchDisplayable(null,getListVehiculo());
-                    
-//                               
-        }
-        else if(command == okVehiculo)
-        {
-            Buscar(getVehiculos().getString(getVehiculos().getSelectedIndex()),vectorVehiculo,0);
-            getListVehiculo().set(0,"Vehiculo:"+getVehiculos().getString(getVehiculos().getSelectedIndex()), null);
-            switchDisplayable(null,getListVehiculo());
-        }
+}//GEN-BEGIN:|7-commandAction|33|7-postCommandAction
+        }//GEN-END:|7-commandAction|33|7-postCommandAction
+       
         
 // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|58|
-//</editor-fold>//GEN-END:|7-commandAction|58|
+}//GEN-BEGIN:|7-commandAction|34|
+//</editor-fold>//GEN-END:|7-commandAction|34|
+
+
 
 
 
@@ -1121,22 +783,7 @@ try {//GEN-BEGIN:|865-getter|1|865-@java.io.IOException
     }
 //</editor-fold>//GEN-END:|865-getter|3|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okProducto ">//GEN-BEGIN:|870-getter|0|870-preInit
-    /**
-     * Returns an initialized instance of okProducto component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkProducto() {
-        if (okProducto == null) {
-//GEN-END:|870-getter|0|870-preInit
-            // write pre-init user code here
-okProducto = new Command("Adicionar Producto", Command.OK, 0);//GEN-LINE:|870-getter|1|870-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|870-getter|2|
-        return okProducto;
-    }
-//</editor-fold>//GEN-END:|870-getter|2|
+
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: task1 ">//GEN-BEGIN:|894-getter|0|894-preInit
     /**
@@ -1160,22 +807,7 @@ task1 = new SimpleCancellableTask();//GEN-BEGIN:|894-getter|1|894-execute
     }
 //</editor-fold>//GEN-END:|894-getter|3|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backProducto ">//GEN-BEGIN:|946-getter|0|946-preInit
-    /**
-     * Returns an initialized instance of backProducto component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackProducto() {
-        if (backProducto == null) {
-//GEN-END:|946-getter|0|946-preInit
-            // write pre-init user code here
-backProducto = new Command("Volver", Command.BACK, 0);//GEN-LINE:|946-getter|1|946-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|946-getter|2|
-        return backProducto;
-    }
-//</editor-fold>//GEN-END:|946-getter|2|
+
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: ticker1 ">//GEN-BEGIN:|968-getter|0|968-preInit
     /**
@@ -1216,289 +848,6 @@ task2 = new SimpleCancellableTask();//GEN-BEGIN:|1003-getter|1|1003-execute
     }
 //</editor-fold>//GEN-END:|1003-getter|3|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: lista ">//GEN-BEGIN:|1042-getter|0|1042-preInit
-    /**
-     * Returns an initialized instance of lista component.
-     *
-     * @return the initialized component instance
-     */
-    public List getLista() {
-        if (lista == null) {
-//GEN-END:|1042-getter|0|1042-preInit
-            // write pre-init user code here
-lista = new List("list", Choice.IMPLICIT);//GEN-BEGIN:|1042-getter|1|1042-postInit
-            lista.addCommand(getOkLista());
-            lista.addCommand(getBackCommand());
-            lista.setCommandListener(this);//GEN-END:|1042-getter|1|1042-postInit
-            // write post-init user code here
-            for(int i=0;i<vectorColores.size();i++)
-            {
-                 Colores c = (Colores) vectorColores.elementAt(i);
-                  lista.append(c.getColdes(), null);
-                 
-            }
-//            if(getListVehiculo().getSelectedIndex()==0)
-//            {
-//                lista.append("Rojo", null);
-//                lista.append("Amarillo", null);
-//                lista.append("Plomo", null);
-//                lista.append("Blanco", null);
-//                lista.append("Azul", null);
-//            }
-//            if(getListVehiculo().getSelectedIndex()==1)
-//            {
-//                for(int i=0;i<10;i++)
-//                {
-//                    lista.append("Tipo"+i, null);
-//                }
-//            }
-//            for(int i=0;i<cuenta.getProductos().size();i++)
-//            {
-//                Products prod = (Products) cuenta.getProductos().elementAt(i);
-//                lista.append(prod.getNotes(), null);
-//                lista.setTitle("Lista de Productos");
-//            }
-}//GEN-BEGIN:|1042-getter|2|
-        return lista;
-    }
-//</editor-fold>//GEN-END:|1042-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Method: listaAction ">//GEN-BEGIN:|1042-action|0|1042-preAction
-    /**
-     * Performs an action assigned to the selected list element in the lista
-     * component.
-     */
-    public void listaAction() {
-//GEN-END:|1042-action|0|1042-preAction
-        // enter pre-action user code here
-String __selectedString = getLista().getString(getLista().getSelectedIndex());//GEN-LINE:|1042-action|1|1042-postAction
-        // enter post-action user code here
-}//GEN-BEGIN:|1042-action|2|
-//</editor-fold>//GEN-END:|1042-action|2|
-
-
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCliente ">//GEN-BEGIN:|1092-getter|0|1092-preInit
-    /**
-     * Returns an initialized instance of okCliente component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCliente() {
-        if (okCliente == null) {
-//GEN-END:|1092-getter|0|1092-preInit
-            // write pre-init user code here
-okCliente = new Command("Ok", Command.OK, 0);//GEN-LINE:|1092-getter|1|1092-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1092-getter|2|
-        return okCliente;
-    }
-//</editor-fold>//GEN-END:|1092-getter|2|
-
-
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okOpciones ">//GEN-BEGIN:|1099-getter|0|1099-preInit
-    /**
-     * Returns an initialized instance of okOpciones component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkOpciones() {
-        if (okOpciones == null) {
-//GEN-END:|1099-getter|0|1099-preInit
-            // write pre-init user code here
-okOpciones = new Command("Seleccionar", Command.BACK, 0);//GEN-LINE:|1099-getter|1|1099-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1099-getter|2|
-        return okOpciones;
-    }
-//</editor-fold>//GEN-END:|1099-getter|2|
-
-
-
-
-
-
-
-
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okLista ">//GEN-BEGIN:|1116-getter|0|1116-preInit
-    /**
-     * Returns an initialized instance of okLista component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkLista() {
-        if (okLista == null) {
-//GEN-END:|1116-getter|0|1116-preInit
-            // write pre-init user code here
-okLista = new Command("Ok", Command.OK, 0);//GEN-LINE:|1116-getter|1|1116-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1116-getter|2|
-        return okLista;
-    }
-//</editor-fold>//GEN-END:|1116-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand ">//GEN-BEGIN:|1121-getter|0|1121-preInit
-    /**
-     * Returns an initialized instance of okCommand component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand() {
-        if (okCommand == null) {
-//GEN-END:|1121-getter|0|1121-preInit
-            // write pre-init user code here
-okCommand = new Command("Ok", Command.OK, 0);//GEN-LINE:|1121-getter|1|1121-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1121-getter|2|
-        return okCommand;
-    }
-//</editor-fold>//GEN-END:|1121-getter|2|
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: listLugar ">//GEN-BEGIN:|1124-getter|0|1124-preInit
-    /**
-     * Returns an initialized instance of listLugar component.
-     *
-     * @return the initialized component instance
-     */
-    public List getListLugar() {
-        if (listLugar == null) {
-//GEN-END:|1124-getter|0|1124-preInit
-            // write pre-init user code here
-listLugar = new List("Productos Seleccionados", Choice.IMPLICIT);//GEN-BEGIN:|1124-getter|1|1124-postInit
-            listLugar.append("Nombre de la Via:", null);
-            listLugar.append("Zona:", null);
-            listLugar.addCommand(getOkOpciones());
-            listLugar.addCommand(getBackMenu());
-            listLugar.addCommand(getOkCommand4());
-            listLugar.setCommandListener(this);
-            listLugar.setSelectedFlags(new boolean[]{true, false});//GEN-END:|1124-getter|1|1124-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1124-getter|2|
-        return listLugar;
-    }
-//</editor-fold>//GEN-END:|1124-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Method: listLugarAction ">//GEN-BEGIN:|1124-action|0|1124-preAction
-    /**
-     * Performs an action assigned to the selected list element in the listLugar
-     * component.
-     */
-    public void listLugarAction() {
-//GEN-END:|1124-action|0|1124-preAction
-        // enter pre-action user code here
-String __selectedString = getListLugar().getString(getListLugar().getSelectedIndex());//GEN-BEGIN:|1124-action|1|1350-preAction
-        if (__selectedString != null) {
-            if (__selectedString.equals("Nombre de la Via:")) {//GEN-END:|1124-action|1|1350-preAction
- // write pre-action user code here
-//GEN-LINE:|1124-action|2|1350-postAction
- // write post-action user code here
-} else if (__selectedString.equals("Zona:")) {//GEN-LINE:|1124-action|3|1351-preAction
- // write pre-action user code here
-//GEN-LINE:|1124-action|4|1351-postAction
- // write post-action user code here
-}//GEN-BEGIN:|1124-action|5|1124-postAction
-        }//GEN-END:|1124-action|5|1124-postAction
-        // enter post-action user code here
-}//GEN-BEGIN:|1124-action|6|
-//</editor-fold>//GEN-END:|1124-action|6|
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backMenu ">//GEN-BEGIN:|1132-getter|0|1132-preInit
-    /**
-     * Returns an initialized instance of backMenu component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackMenu() {
-        if (backMenu == null) {
-//GEN-END:|1132-getter|0|1132-preInit
-            // write pre-init user code here
-backMenu = new Command("Atras", Command.OK, 0);//GEN-LINE:|1132-getter|1|1132-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1132-getter|2|
-        return backMenu;
-    }
-//</editor-fold>//GEN-END:|1132-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: ImprimirFactura ">//GEN-BEGIN:|1139-getter|0|1139-preInit
-    /**
-     * Returns an initialized instance of ImprimirFactura component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getImprimirFactura() {
-        if (ImprimirFactura == null) {
-//GEN-END:|1139-getter|0|1139-preInit
-            // write pre-init user code here
-ImprimirFactura = new Command("Imprimir ", Command.OK, 0);//GEN-LINE:|1139-getter|1|1139-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1139-getter|2|
-        return ImprimirFactura;
-    }
-//</editor-fold>//GEN-END:|1139-getter|2|
-
-
-
-
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand1 ">//GEN-BEGIN:|1147-getter|0|1147-preInit
-    /**
-     * Returns an initialized instance of okCommand1 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand1() {
-        if (okCommand1 == null) {
-//GEN-END:|1147-getter|0|1147-preInit
-            // write pre-init user code here
-okCommand1 = new Command("ingresar nombre", Command.OK, 0);//GEN-LINE:|1147-getter|1|1147-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1147-getter|2|
-        return okCommand1;
-    }
-//</editor-fold>//GEN-END:|1147-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand2 ">//GEN-BEGIN:|1150-getter|0|1150-preInit
-    /**
-     * Returns an initialized instance of okCommand2 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand2() {
-        if (okCommand2 == null) {
-//GEN-END:|1150-getter|0|1150-preInit
-            // write pre-init user code here
-okCommand2 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1150-getter|1|1150-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1150-getter|2|
-        return okCommand2;
-    }
-//</editor-fold>//GEN-END:|1150-getter|2|
-
-
-
-
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: okMenu ">//GEN-BEGIN:|1160-getter|0|1160-preInit
     /**
@@ -1517,39 +866,9 @@ okMenu = new Command("OK", Command.OK, 0);//GEN-LINE:|1160-getter|1|1160-postIni
     }
 //</editor-fold>//GEN-END:|1160-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: cancelCommand ">//GEN-BEGIN:|1163-getter|0|1163-preInit
-    /**
-     * Returns an initialized instance of cancelCommand component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getCancelCommand() {
-        if (cancelCommand == null) {
-//GEN-END:|1163-getter|0|1163-preInit
-            // write pre-init user code here
-cancelCommand = new Command("Cancel", Command.CANCEL, 0);//GEN-LINE:|1163-getter|1|1163-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1163-getter|2|
-        return cancelCommand;
-    }
-//</editor-fold>//GEN-END:|1163-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backSalir ">//GEN-BEGIN:|1165-getter|0|1165-preInit
-    /**
-     * Returns an initialized instance of backSalir component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackSalir() {
-        if (backSalir == null) {
-//GEN-END:|1165-getter|0|1165-preInit
-            // write pre-init user code here
-backSalir = new Command("Atras", Command.BACK, 0);//GEN-LINE:|1165-getter|1|1165-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1165-getter|2|
-        return backSalir;
-    }
-//</editor-fold>//GEN-END:|1165-getter|2|
+
+
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: listMenu ">//GEN-BEGIN:|1154-getter|0|1154-preInit
     /**
@@ -1563,13 +882,11 @@ backSalir = new Command("Atras", Command.BACK, 0);//GEN-LINE:|1165-getter|1|1165
             // write pre-init user code here
             
             listMenu = new List("list", Choice.IMPLICIT);//GEN-BEGIN:|1154-getter|1|1154-postInit
-            listMenu.append("1) Infraccion Municipal", null);
-            listMenu.append("2) Actualizar Informacion", null);
-            listMenu.append("3) Ayuda", null);
+            listMenu.append("1) Datos del Infractor", null);
+            listMenu.append("2) Infracciones", null);
             listMenu.addCommand(getOkMenu());
-            listMenu.addCommand(getBackSalir());
             listMenu.setCommandListener(this);
-            listMenu.setSelectedFlags(new boolean[]{false, false, false});//GEN-END:|1154-getter|1|1154-postInit
+            listMenu.setSelectedFlags(new boolean[]{false, false});//GEN-END:|1154-getter|1|1154-postInit
             // write post-init user code here
             
             listMenu.setTitle("Menu Infraccion Usuario:"+textField9.getText());
@@ -1588,211 +905,28 @@ backSalir = new Command("Atras", Command.BACK, 0);//GEN-LINE:|1165-getter|1|1165
         // enter pre-action user code here
 String __selectedString = getListMenu().getString(getListMenu().getSelectedIndex());//GEN-BEGIN:|1154-action|1|1158-preAction
         if (__selectedString != null) {
-            if (__selectedString.equals("1) Infraccion Municipal")) {//GEN-END:|1154-action|1|1158-preAction
+            if (__selectedString.equals("1) Datos del Infractor")) {//GEN-END:|1154-action|1|1158-preAction
                 // write pre-action user code here
-switchDisplayable(null, getFormVehiculo());//GEN-LINE:|1154-action|2|1158-postAction
+switchDisplayable(null, getFormInfractor());//GEN-LINE:|1154-action|2|1158-postAction
                 // write post-action user code here
                   
 //                  infraccion = new Infraccion();
 //                  infraccion.setNombreagente(textField9.getString());
-                  if(infcon !=null)
-                  {
-                      infcon = null;
-                  }
-                  infcon = new Inf();
+               
                   Limpiar();
-            } else if (__selectedString.equals("2) Actualizar Informacion")) {//GEN-LINE:|1154-action|3|1159-preAction
+            } else if (__selectedString.equals("2) Infracciones")) {//GEN-LINE:|1154-action|3|1159-preAction
                 // write pre-action user code here
-//GEN-LINE:|1154-action|4|1159-postAction
-                // write post-action user code here
-} else if (__selectedString.equals("3) Ayuda")) {//GEN-LINE:|1154-action|5|1157-preAction
-                // write pre-action user code here
-//                formFactura = null;
-//GEN-LINE:|1154-action|6|1157-postAction
-//              strNitCli.setText(cliente.getCliente().getNit());
-//              strNomCli.setText(cliente.getCliente().getName());
-            
-              
-//              Object[] data;
-//                while ( (data = getNextData()) != null ) {
-//                        int row = table.addRow();
-//                        for (int i=0; i<data.length; i++ ) {
-//                                if (i  >= table.getNumberOfColumns() ) {
-//                                        table.addColumn();
-//                                }
-//                                table.set( i, row, data[i] );
-//                        }
-//                }
-              
-//               table.addRow();
-//               table.addColumn();
-//               table.addColumn();
-//               table.addColumn();
-//               table.set(0, 0,"Cant.");
-//               table.set(1, 0,"Producto");
-//               table.set(2, 0,"Bs");
-//               double total=0;
-//          
-//               for(int i=0;i<listaProductos.size();i++)
-//                {
-//                  table.addRow();
-//                    Products pro = (Products) listaProductos.elementAt(i);
-//                   table.set(0, i+1, pro.getQty());
-//                   table.set(1, i+1, pro.getNotes());
-//                   table.set(2, i+1, Double.parseDouble(pro.getCost())*Double.parseDouble(pro.getQty())+"");
-//    //                    p = p +"\n "+Double.parseDouble(pro.getQty())+" "+pro.getNotes()+" "+(Double.parseDouble(pro.getCost())*Double.parseDouble(pro.getQty()));
-//                   total = total + (Double.parseDouble(pro.getCost())*Double.parseDouble(pro.getQty()));
-//                }
-//                table.addRow();
-//                table.set(0, listaProductos.size(),"Cant.");
-//                table.set(1, listaProductos.size(),"Producto");
-//                table.set(2, listaProductos.size(),"Bs");
-//              // columna fila
-//              if(data!=null)
-//              {
-//                  data = null;
-//              }
-//               data = new TableData(3,(listaProductos.size()+3));
-//  //            formFactura.setTitle(""+listaProductos.size());
-//  //            Products pro = (Products) listaProductos.elementAt(0);
-//  //            data.set( 1, 0, "1,0");
-//  //            data.set( 2, 0, "2,0");
-//  //            data.set( 0, 1, "0,1");
-//  //            data.set( 1, 1, "xxxx1,1");
-//  //            data.set( 2, 1, "2,1");
-//               data.set(0,0, "Cant.");
-//               data.set(1,0,"Producto");
-//               data.set(2,0, "Bs");
-//               double total=0;
-//                for(int i=0;i<listaProductos.size();i++)
-//                {
-//                   Products pro = (Products) listaProductos.elementAt(i);
-//                   data.set(0, i+1, pro.getQty());
-//                   data.set(1, i+1, pro.getNotes());
-//                   data.set(2, i+1, Double.parseDouble(pro.getCost())*Double.parseDouble(pro.getQty())+"");
-//    //                    p = p +"\n "+Double.parseDouble(pro.getQty())+" "+pro.getNotes()+" "+(Double.parseDouble(pro.getCost())*Double.parseDouble(pro.getQty()));
-//                        total = total + (Double.parseDouble(pro.getCost())*Double.parseDouble(pro.getQty()));
-//                }
-//                 data.set(0,listaProductos.size()+1, "Total");
-//                 data.set(1,listaProductos.size()+1,"");
-//                 data.set(2,listaProductos.size()+1, ""+total);
-//                //#style defaultTable
-//                TableItem table = new TableItem(data);
-//                formFactura.append( table );            
-
-                // write post-action user code here
-}//GEN-BEGIN:|1154-action|7|1154-postAction
-        }//GEN-END:|1154-action|7|1154-postAction
+switchDisplayable(null, getListSeleccionados());//GEN-LINE:|1154-action|4|1159-postAction
+                // wr
+                
+            }//GEN-BEGIN:|1154-action|5|1154-postAction
+        }//GEN-END:|1154-action|5|1154-postAction
         // enter post-action user code here
-}//GEN-BEGIN:|1154-action|8|
-//</editor-fold>//GEN-END:|1154-action|8|
+}//GEN-BEGIN:|1154-action|6|
+//</editor-fold>//GEN-END:|1154-action|6|
 
 
 
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okSelOp ">//GEN-BEGIN:|1174-getter|0|1174-preInit
-    /**
-     * Returns an initialized instance of okSelOp component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkSelOp() {
-        if (okSelOp == null) {
-//GEN-END:|1174-getter|0|1174-preInit
-            // write pre-init user code here
-okSelOp = new Command("Ok", Command.OK, 0);//GEN-LINE:|1174-getter|1|1174-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1174-getter|2|
-        return okSelOp;
-    }
-//</editor-fold>//GEN-END:|1174-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backFactura ">//GEN-BEGIN:|1178-getter|0|1178-preInit
-    /**
-     * Returns an initialized instance of backFactura component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackFactura() {
-        if (backFactura == null) {
-//GEN-END:|1178-getter|0|1178-preInit
-            // write pre-init user code here
-backFactura = new Command("Cancelar", Command.BACK, 0);//GEN-LINE:|1178-getter|1|1178-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1178-getter|2|
-        return backFactura;
-    }
-//</editor-fold>//GEN-END:|1178-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCliente ">//GEN-BEGIN:|1184-getter|0|1184-preInit
-    /**
-     * Returns an initialized instance of backCliente component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackCliente() {
-        if (backCliente == null) {
-//GEN-END:|1184-getter|0|1184-preInit
-            // write pre-init user code here
-backCliente = new Command("Atras", Command.OK, 0);//GEN-LINE:|1184-getter|1|1184-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1184-getter|2|
-        return backCliente;
-    }
-//</editor-fold>//GEN-END:|1184-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand3 ">//GEN-BEGIN:|1188-getter|0|1188-preInit
-    /**
-     * Returns an initialized instance of okCommand3 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand3() {
-        if (okCommand3 == null) {
-//GEN-END:|1188-getter|0|1188-preInit
-            // write pre-init user code here
-okCommand3 = new Command("Adicionar", Command.OK, 0);//GEN-LINE:|1188-getter|1|1188-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1188-getter|2|
-        return okCommand3;
-    }
-//</editor-fold>//GEN-END:|1188-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand4 ">//GEN-BEGIN:|1191-getter|0|1191-preInit
-    /**
-     * Returns an initialized instance of okCommand4 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand4() {
-        if (okCommand4 == null) {
-//GEN-END:|1191-getter|0|1191-preInit
-            // write pre-init user code here
-okCommand4 = new Command("Siguente", Command.OK, 0);//GEN-LINE:|1191-getter|1|1191-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1191-getter|2|
-        return okCommand4;
-    }
-//</editor-fold>//GEN-END:|1191-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand ">//GEN-BEGIN:|1193-getter|0|1193-preInit
-    /**
-     * Returns an initialized instance of backCommand component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackCommand() {
-        if (backCommand == null) {
-//GEN-END:|1193-getter|0|1193-preInit
-            // write pre-init user code here
-backCommand = new Command("Atras", Command.BACK, 0);//GEN-LINE:|1193-getter|1|1193-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1193-getter|2|
-        return backCommand;
-    }
-//</editor-fold>//GEN-END:|1193-getter|2|
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: image10 ">//GEN-BEGIN:|1196-getter|0|1196-preInit
     /**
@@ -1814,78 +948,6 @@ try {//GEN-BEGIN:|1196-getter|1|1196-@java.io.IOException
         return image10;
     }
 //</editor-fold>//GEN-END:|1196-getter|3|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand5 ">//GEN-BEGIN:|1198-getter|0|1198-preInit
-    /**
-     * Returns an initialized instance of okCommand5 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand5() {
-        if (okCommand5 == null) {
-//GEN-END:|1198-getter|0|1198-preInit
-            // write pre-init user code here
-okCommand5 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1198-getter|1|1198-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1198-getter|2|
-        return okCommand5;
-    }
-//</editor-fold>//GEN-END:|1198-getter|2|
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand6 ">//GEN-BEGIN:|1203-getter|0|1203-preInit
-    /**
-     * Returns an initialized instance of okCommand6 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand6() {
-        if (okCommand6 == null) {
-//GEN-END:|1203-getter|0|1203-preInit
-            // write pre-init user code here
-okCommand6 = new Command("Crear", Command.OK, 0);//GEN-LINE:|1203-getter|1|1203-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1203-getter|2|
-        return okCommand6;
-    }
-//</editor-fold>//GEN-END:|1203-getter|2|
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand1 ">//GEN-BEGIN:|1206-getter|0|1206-preInit
-    /**
-     * Returns an initialized instance of backCommand1 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackCommand1() {
-        if (backCommand1 == null) {
-//GEN-END:|1206-getter|0|1206-preInit
-            // write pre-init user code here
-backCommand1 = new Command("Limpiar", Command.BACK, 0);//GEN-LINE:|1206-getter|1|1206-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1206-getter|2|
-        return backCommand1;
-    }
-//</editor-fold>//GEN-END:|1206-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand7 ">//GEN-BEGIN:|1208-getter|0|1208-preInit
-    /**
-     * Returns an initialized instance of okCommand7 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand7() {
-        if (okCommand7 == null) {
-//GEN-END:|1208-getter|0|1208-preInit
-            // write pre-init user code here
-okCommand7 = new Command("AgregarProducto", Command.OK, 0);//GEN-LINE:|1208-getter|1|1208-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1208-getter|2|
-        return okCommand7;
-    }
-//</editor-fold>//GEN-END:|1208-getter|2|
 
 
 
@@ -1947,43 +1009,6 @@ stopCommand = new Command("Stop", Command.STOP, 0);//GEN-LINE:|1218-getter|1|121
 //</editor-fold>//GEN-END:|1218-getter|2|
 
 
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand8 ">//GEN-BEGIN:|1223-getter|0|1223-preInit
-    /**
-     * Returns an initialized instance of okCommand8 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand8() {
-        if (okCommand8 == null) {
-//GEN-END:|1223-getter|0|1223-preInit
-            // write pre-init user code here
-okCommand8 = new Command("ok", "<null>", Command.OK, 0);//GEN-LINE:|1223-getter|1|1223-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1223-getter|2|
-        return okCommand8;
-    }
-//</editor-fold>//GEN-END:|1223-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand2 ">//GEN-BEGIN:|1227-getter|0|1227-preInit
-    /**
-     * Returns an initialized instance of backCommand2 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackCommand2() {
-        if (backCommand2 == null) {
-//GEN-END:|1227-getter|0|1227-preInit
-            // write pre-init user code here
-backCommand2 = new Command("Salir", Command.BACK, 0);//GEN-LINE:|1227-getter|1|1227-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1227-getter|2|
-        return backCommand2;
-    }
-//</editor-fold>//GEN-END:|1227-getter|2|
-
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: screenCommand ">//GEN-BEGIN:|1235-getter|0|1235-preInit
     /**
      * Returns an initialized instance of screenCommand component.
@@ -2001,22 +1026,7 @@ screenCommand = new Command("Screen", Command.SCREEN, 0);//GEN-LINE:|1235-getter
     }
 //</editor-fold>//GEN-END:|1235-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand9 ">//GEN-BEGIN:|1237-getter|0|1237-preInit
-    /**
-     * Returns an initialized instance of okCommand9 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand9() {
-        if (okCommand9 == null) {
-//GEN-END:|1237-getter|0|1237-preInit
-            // write pre-init user code here
-okCommand9 = new Command("activar gauge", Command.OK, 0);//GEN-LINE:|1237-getter|1|1237-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1237-getter|2|
-        return okCommand9;
-    }
-//</editor-fold>//GEN-END:|1237-getter|2|
+
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: formLoading ">//GEN-BEGIN:|1239-getter|0|1239-preInit
     /**
@@ -2029,9 +1039,7 @@ okCommand9 = new Command("activar gauge", Command.OK, 0);//GEN-LINE:|1237-getter
 //GEN-END:|1239-getter|0|1239-preInit
             // write pre-init user code here
             //#style mailAlert
-formLoading = new Form("Enviando Solicitud");//GEN-BEGIN:|1239-getter|1|1239-postInit
-            formLoading.addCommand(getCancelCommand2());
-            formLoading.setCommandListener(this);//GEN-END:|1239-getter|1|1239-postInit
+formLoading = new Form("Enviando Solicitud");//GEN-LINE:|1239-getter|1|1239-postInit
             // write post-init user code here
             //#style .busyIndicator
             Gauge busyIndicator = new Gauge( null, false,Gauge.INDEFINITE, Gauge.CONTINUOUS_RUNNING );
@@ -2040,41 +1048,6 @@ formLoading = new Form("Enviando Solicitud");//GEN-BEGIN:|1239-getter|1|1239-pos
         return formLoading;
     }
 //</editor-fold>//GEN-END:|1239-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: cancelCommand1 ">//GEN-BEGIN:|1240-getter|0|1240-preInit
-    /**
-     * Returns an initialized instance of cancelCommand1 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getCancelCommand1() {
-        if (cancelCommand1 == null) {
-//GEN-END:|1240-getter|0|1240-preInit
-            // write pre-init user code here
-cancelCommand1 = new Command("Cancel", Command.CANCEL, 0);//GEN-LINE:|1240-getter|1|1240-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1240-getter|2|
-        return cancelCommand1;
-    }
-//</editor-fold>//GEN-END:|1240-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: cancelCommand2 ">//GEN-BEGIN:|1243-getter|0|1243-preInit
-    /**
-     * Returns an initialized instance of cancelCommand2 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getCancelCommand2() {
-        if (cancelCommand2 == null) {
-//GEN-END:|1243-getter|0|1243-preInit
-            // write pre-init user code here
-cancelCommand2 = new Command("Cancelar", Command.CANCEL, 0);//GEN-LINE:|1243-getter|1|1243-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1243-getter|2|
-        return cancelCommand2;
-    }
-//</editor-fold>//GEN-END:|1243-getter|2|
-
 
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: image11 ">//GEN-BEGIN:|1246-getter|0|1246-preInit
@@ -2107,23 +1080,6 @@ try {//GEN-BEGIN:|1246-getter|1|1246-@java.io.IOException
     }
 //</editor-fold>//GEN-END:|1246-getter|3|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okRegistrar ">//GEN-BEGIN:|1252-getter|0|1252-preInit
-    /**
-     * Returns an initialized instance of okRegistrar component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkRegistrar() {
-        if (okRegistrar == null) {
-//GEN-END:|1252-getter|0|1252-preInit
- // write pre-init user code here
-okRegistrar = new Command("Ok", Command.OK, 0);//GEN-LINE:|1252-getter|1|1252-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1252-getter|2|
-        return okRegistrar;
-    }
-//</editor-fold>//GEN-END:|1252-getter|2|
-
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: back ">//GEN-BEGIN:|1254-getter|0|1254-preInit
     /**
      * Returns an initialized instance of back component.
@@ -2140,135 +1096,6 @@ back = new Command("Salir", Command.OK, 0);//GEN-LINE:|1254-getter|1|1254-postIn
         return back;
     }
 //</editor-fold>//GEN-END:|1254-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okDatos ">//GEN-BEGIN:|1260-getter|0|1260-preInit
-    /**
-     * Returns an initialized instance of okDatos component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkDatos() {
-        if (okDatos == null) {
-//GEN-END:|1260-getter|0|1260-preInit
- // write pre-init user code here
-okDatos = new Command("Ok", Command.OK, 0);//GEN-LINE:|1260-getter|1|1260-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1260-getter|2|
-        return okDatos;
-    }
-//</editor-fold>//GEN-END:|1260-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: formRegistro ">//GEN-BEGIN:|1247-getter|0|1247-preInit
-    /**
-     * Returns an initialized instance of formRegistro component.
-     *
-     * @return the initialized component instance
-     */
-    public Form getFormRegistro() {
-        if (formRegistro == null) {
-//GEN-END:|1247-getter|0|1247-preInit
- // write pre-init user code here
-formRegistro = new Form("Registro de Cliente", new Item[]{getTxtNitCli(), getTxtNomCli(), getTxtTelCli(), getTxtEmailCli()});//GEN-BEGIN:|1247-getter|1|1247-postInit
-            formRegistro.addCommand(getOkRegistrar());
-            formRegistro.addCommand(getBack());
-            formRegistro.setCommandListener(this);//GEN-END:|1247-getter|1|1247-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1247-getter|2|
-        return formRegistro;
-    }
-//</editor-fold>//GEN-END:|1247-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txtNitCli ">//GEN-BEGIN:|1248-getter|0|1248-preInit
-    /**
-     * Returns an initialized instance of txtNitCli component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTxtNitCli() {
-        if (txtNitCli == null) {
-//GEN-END:|1248-getter|0|1248-preInit
- // write pre-init user code here
-txtNitCli = new TextField("Nit:", null, 32, TextField.NUMERIC);//GEN-LINE:|1248-getter|1|1248-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1248-getter|2|
-        return txtNitCli;
-    }
-//</editor-fold>//GEN-END:|1248-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txtNomCli ">//GEN-BEGIN:|1249-getter|0|1249-preInit
-    /**
-     * Returns an initialized instance of txtNomCli component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTxtNomCli() {
-        if (txtNomCli == null) {
-//GEN-END:|1249-getter|0|1249-preInit
- // write pre-init user code here
-txtNomCli = new TextField("Nombre:", null, 32, TextField.ANY);//GEN-LINE:|1249-getter|1|1249-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1249-getter|2|
-        return txtNomCli;
-    }
-//</editor-fold>//GEN-END:|1249-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txtTelCli ">//GEN-BEGIN:|1250-getter|0|1250-preInit
-    /**
-     * Returns an initialized instance of txtTelCli component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTxtTelCli() {
-        if (txtTelCli == null) {
-//GEN-END:|1250-getter|0|1250-preInit
- // write pre-init user code here
-txtTelCli = new TextField("Telefono:", null, 32, TextField.NUMERIC);//GEN-LINE:|1250-getter|1|1250-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1250-getter|2|
-        return txtTelCli;
-    }
-//</editor-fold>//GEN-END:|1250-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txtEmailCli ">//GEN-BEGIN:|1251-getter|0|1251-preInit
-    /**
-     * Returns an initialized instance of txtEmailCli component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTxtEmailCli() {
-        if (txtEmailCli == null) {
-//GEN-END:|1251-getter|0|1251-preInit
- // write pre-init user code here
-txtEmailCli = new TextField("Email:", null, 32, TextField.ANY);//GEN-LINE:|1251-getter|1|1251-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1251-getter|2|
-        return txtEmailCli;
-    }
-//</editor-fold>//GEN-END:|1251-getter|2|
-
-
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backDatos ">//GEN-BEGIN:|1262-getter|0|1262-preInit
-    /**
-     * Returns an initialized instance of backDatos component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getBackDatos() {
-        if (backDatos == null) {
-//GEN-END:|1262-getter|0|1262-preInit
- // write pre-init user code here
-backDatos = new Command("Ok", Command.OK, 0);//GEN-LINE:|1262-getter|1|1262-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1262-getter|2|
-        return backDatos;
-    }
-//</editor-fold>//GEN-END:|1262-getter|2|
-
 
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: image12 ">//GEN-BEGIN:|1271-getter|0|1271-preInit
@@ -2291,121 +1118,6 @@ try {//GEN-BEGIN:|1271-getter|1|1271-@java.io.IOException
         return image12;
     }
 //</editor-fold>//GEN-END:|1271-getter|3|
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand10 ">//GEN-BEGIN:|1281-getter|0|1281-preInit
-    /**
-     * Returns an initialized instance of okCommand10 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand10() {
-        if (okCommand10 == null) {
-//GEN-END:|1281-getter|0|1281-preInit
- // write pre-init user code here
-okCommand10 = new Command("Aceptar", Command.OK, 0);//GEN-LINE:|1281-getter|1|1281-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1281-getter|2|
-        return okCommand10;
-    }
-//</editor-fold>//GEN-END:|1281-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand11 ">//GEN-BEGIN:|1286-getter|0|1286-preInit
-    /**
-     * Returns an initialized instance of okCommand11 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand11() {
-        if (okCommand11 == null) {
-//GEN-END:|1286-getter|0|1286-preInit
- // write pre-init user code here
-okCommand11 = new Command("Atras", Command.OK, 0);//GEN-LINE:|1286-getter|1|1286-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1286-getter|2|
-        return okCommand11;
-    }
-//</editor-fold>//GEN-END:|1286-getter|2|
-
-
-
-
- // enter pre-action user code here
-
- // enter post-action user code here
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand12 ">//GEN-BEGIN:|1302-getter|0|1302-preInit
-    /**
-     * Returns an initialized instance of okCommand12 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand12() {
-        if (okCommand12 == null) {
-//GEN-END:|1302-getter|0|1302-preInit
- // write pre-init user code here
-okCommand12 = new Command("Aceptar", Command.OK, 0);//GEN-LINE:|1302-getter|1|1302-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1302-getter|2|
-        return okCommand12;
-    }
-//</editor-fold>//GEN-END:|1302-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand13 ">//GEN-BEGIN:|1304-getter|0|1304-preInit
-    /**
-     * Returns an initialized instance of okCommand13 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand13() {
-        if (okCommand13 == null) {
-//GEN-END:|1304-getter|0|1304-preInit
- // write pre-init user code here
-okCommand13 = new Command("Atras", Command.OK, 0);//GEN-LINE:|1304-getter|1|1304-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1304-getter|2|
-        return okCommand13;
-    }
-//</editor-fold>//GEN-END:|1304-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand14 ">//GEN-BEGIN:|1309-getter|0|1309-preInit
-    /**
-     * Returns an initialized instance of okCommand14 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand14() {
-        if (okCommand14 == null) {
-//GEN-END:|1309-getter|0|1309-preInit
- // write pre-init user code here
-okCommand14 = new Command("Aceptar", Command.OK, 0);//GEN-LINE:|1309-getter|1|1309-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1309-getter|2|
-        return okCommand14;
-    }
-//</editor-fold>//GEN-END:|1309-getter|2|
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: image13 ">//GEN-BEGIN:|1313-getter|0|1313-preInit
     /**
@@ -2470,199 +1182,6 @@ try {//GEN-BEGIN:|1316-getter|1|1316-@java.io.IOException
     }
 //</editor-fold>//GEN-END:|1316-getter|3|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand15 ">//GEN-BEGIN:|1318-getter|0|1318-preInit
-    /**
-     * Returns an initialized instance of okCommand15 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand15() {
-        if (okCommand15 == null) {
-//GEN-END:|1318-getter|0|1318-preInit
- // write pre-init user code here
-okCommand15 = new Command("guardar", Command.OK, 0);//GEN-LINE:|1318-getter|1|1318-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1318-getter|2|
-        return okCommand15;
-    }
-//</editor-fold>//GEN-END:|1318-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand16 ">//GEN-BEGIN:|1320-getter|0|1320-preInit
-    /**
-     * Returns an initialized instance of okCommand16 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand16() {
-        if (okCommand16 == null) {
-//GEN-END:|1320-getter|0|1320-preInit
- // write pre-init user code here
-okCommand16 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1320-getter|1|1320-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1320-getter|2|
-        return okCommand16;
-    }
-//</editor-fold>//GEN-END:|1320-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: formAgenda ">//GEN-BEGIN:|1317-getter|0|1317-preInit
-    /**
-     * Returns an initialized instance of formAgenda component.
-     *
-     * @return the initialized component instance
-     */
-    public Form getFormAgenda() {
-        if (formAgenda == null) {
-//GEN-END:|1317-getter|0|1317-preInit
- // write pre-init user code here
-formAgenda = new Form("Agenda", new Item[]{getTxt1(), getTxt2(), getTxt3()});//GEN-BEGIN:|1317-getter|1|1317-postInit
-            formAgenda.addCommand(getOkCommand15());
-            formAgenda.addCommand(getOkCommand17());
-            formAgenda.addCommand(getOkCommand18());
-            formAgenda.setCommandListener(this);//GEN-END:|1317-getter|1|1317-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1317-getter|2|
-        return formAgenda;
-    }
-//</editor-fold>//GEN-END:|1317-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txt1 ">//GEN-BEGIN:|1322-getter|0|1322-preInit
-    /**
-     * Returns an initialized instance of txt1 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTxt1() {
-        if (txt1 == null) {
-//GEN-END:|1322-getter|0|1322-preInit
- // write pre-init user code here
-txt1 = new TextField("Numero de Telefono:", null, 32, TextField.NUMERIC);//GEN-LINE:|1322-getter|1|1322-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1322-getter|2|
-        return txt1;
-    }
-//</editor-fold>//GEN-END:|1322-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txt2 ">//GEN-BEGIN:|1323-getter|0|1323-preInit
-    /**
-     * Returns an initialized instance of txt2 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTxt2() {
-        if (txt2 == null) {
-//GEN-END:|1323-getter|0|1323-preInit
- // write pre-init user code here
-txt2 = new TextField("Nombre", null, 32, TextField.ANY);//GEN-LINE:|1323-getter|1|1323-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1323-getter|2|
-        return txt2;
-    }
-//</editor-fold>//GEN-END:|1323-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand17 ">//GEN-BEGIN:|1324-getter|0|1324-preInit
-    /**
-     * Returns an initialized instance of okCommand17 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand17() {
-        if (okCommand17 == null) {
-//GEN-END:|1324-getter|0|1324-preInit
- // write pre-init user code here
-okCommand17 = new Command("rescatar", Command.OK, 0);//GEN-LINE:|1324-getter|1|1324-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1324-getter|2|
-        return okCommand17;
-    }
-//</editor-fold>//GEN-END:|1324-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txt3 ">//GEN-BEGIN:|1326-getter|0|1326-preInit
-    /**
-     * Returns an initialized instance of txt3 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTxt3() {
-        if (txt3 == null) {
-//GEN-END:|1326-getter|0|1326-preInit
- // write pre-init user code here
-txt3 = new TextField("id para rescatar", null, 32, TextField.ANY);//GEN-LINE:|1326-getter|1|1326-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1326-getter|2|
-        return txt3;
-    }
-//</editor-fold>//GEN-END:|1326-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: exitCommand1 ">//GEN-BEGIN:|1327-getter|0|1327-preInit
-    /**
-     * Returns an initialized instance of exitCommand1 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getExitCommand1() {
-        if (exitCommand1 == null) {
-//GEN-END:|1327-getter|0|1327-preInit
- // write pre-init user code here
-exitCommand1 = new Command("Exit", Command.EXIT, 0);//GEN-LINE:|1327-getter|1|1327-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1327-getter|2|
-        return exitCommand1;
-    }
-//</editor-fold>//GEN-END:|1327-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand18 ">//GEN-BEGIN:|1330-getter|0|1330-preInit
-    /**
-     * Returns an initialized instance of okCommand18 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand18() {
-        if (okCommand18 == null) {
-//GEN-END:|1330-getter|0|1330-preInit
- // write pre-init user code here
-okCommand18 = new Command("cambiar", Command.OK, 0);//GEN-LINE:|1330-getter|1|1330-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1330-getter|2|
-        return okCommand18;
-    }
-//</editor-fold>//GEN-END:|1330-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand19 ">//GEN-BEGIN:|1334-getter|0|1334-preInit
-    /**
-     * Returns an initialized instance of okCommand19 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand19() {
-        if (okCommand19 == null) {
-//GEN-END:|1334-getter|0|1334-preInit
- // write pre-init user code here
-okCommand19 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1334-getter|1|1334-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1334-getter|2|
-        return okCommand19;
-    }
-//</editor-fold>//GEN-END:|1334-getter|2|
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okFiltro ">//GEN-BEGIN:|1337-getter|0|1337-preInit
-    /**
-     * Returns an initialized instance of okFiltro component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkFiltro() {
-        if (okFiltro == null) {
-//GEN-END:|1337-getter|0|1337-preInit
- // write pre-init user code here
-okFiltro = new Command("Aceptar", Command.OK, 0);//GEN-LINE:|1337-getter|1|1337-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1337-getter|2|
-        return okFiltro;
-    }
-//</editor-fold>//GEN-END:|1337-getter|2|
-
     public Command getOkZona()
     {
         if(okZona == null )
@@ -2672,428 +1191,8 @@ okFiltro = new Command("Aceptar", Command.OK, 0);//GEN-LINE:|1337-getter|1|1337-
         }
         return okZona;
     }
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okFil ">//GEN-BEGIN:|1340-getter|0|1340-preInit
-
-    /**
-     * Returns an initialized instance of okFil component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkFil() {
-        if (okFil == null) {
-//GEN-END:|1340-getter|0|1340-preInit
- // write pre-init user code here
-okFil = new Command("Ok", Command.OK, 0);//GEN-LINE:|1340-getter|1|1340-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1340-getter|2|
-        return okFil;
-    }
-//</editor-fold>//GEN-END:|1340-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand20 ">//GEN-BEGIN:|1346-getter|0|1346-preInit
-    /**
-     * Returns an initialized instance of okCommand20 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand20() {
-        if (okCommand20 == null) {
-//GEN-END:|1346-getter|0|1346-preInit
- // write pre-init user code here
-okCommand20 = new Command("oklista", Command.OK, 0);//GEN-LINE:|1346-getter|1|1346-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1346-getter|2|
-        return okCommand20;
-    }
-//</editor-fold>//GEN-END:|1346-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: formVehiculo ">//GEN-BEGIN:|1352-getter|0|1352-preInit
-    /**
-     * Returns an initialized instance of formVehiculo component.
-     *
-     * @return the initialized component instance
-     */
-    public Form getFormVehiculo() {
-        if (formVehiculo == null) {
-//GEN-END:|1352-getter|0|1352-preInit
- // write pre-init user code here
-formVehiculo = new Form("Datos de la Infaccion", new Item[]{getTextField(), getTextField1(), getTextField11(), getTextField12(), getTextField13()});//GEN-BEGIN:|1352-getter|1|1352-postInit
-            formVehiculo.addCommand(getOkCommand21());
-            formVehiculo.addCommand(getBack());
-            formVehiculo.setCommandListener(this);//GEN-END:|1352-getter|1|1352-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1352-getter|2|
-        return formVehiculo;
-    }
-//</editor-fold>//GEN-END:|1352-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand21 ">//GEN-BEGIN:|1353-getter|0|1353-preInit
-    /**
-     * Returns an initialized instance of okCommand21 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand21() {
-        if (okCommand21 == null) {
-//GEN-END:|1353-getter|0|1353-preInit
- // write pre-init user code here
-okCommand21 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1353-getter|1|1353-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1353-getter|2|
-        return okCommand21;
-    }
-//</editor-fold>//GEN-END:|1353-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField ">//GEN-BEGIN:|1355-getter|0|1355-preInit
-    /**
-     * Returns an initialized instance of textField component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField() {
-        if (textField == null) {
-//GEN-END:|1355-getter|0|1355-preInit
- // write pre-init user code here
-textField = new TextField("Literal de Placa:", null, 32, TextField.ANY);//GEN-LINE:|1355-getter|1|1355-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1355-getter|2|
-        return textField;
-    }
-//</editor-fold>//GEN-END:|1355-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField1 ">//GEN-BEGIN:|1356-getter|0|1356-preInit
-    /**
-     * Returns an initialized instance of textField1 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField1() {
-        if (textField1 == null) {
-//GEN-END:|1356-getter|0|1356-preInit
- // write pre-init user code here
-textField1 = new TextField("No. de Placa:", null, 32, TextField.NUMERIC);//GEN-LINE:|1356-getter|1|1356-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1356-getter|2|
-        return textField1;
-    }
-//</editor-fold>//GEN-END:|1356-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand22 ">//GEN-BEGIN:|1364-getter|0|1364-preInit
-    /**
-     * Returns an initialized instance of okCommand22 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand22() {
-        if (okCommand22 == null) {
-//GEN-END:|1364-getter|0|1364-preInit
- // write pre-init user code here
-okCommand22 = new Command("Datos del Conductor", Command.OK, 0);//GEN-LINE:|1364-getter|1|1364-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1364-getter|2|
-        return okCommand22;
-    }
-//</editor-fold>//GEN-END:|1364-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand23 ">//GEN-BEGIN:|1366-getter|0|1366-preInit
-    /**
-     * Returns an initialized instance of okCommand23 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand23() {
-        if (okCommand23 == null) {
-//GEN-END:|1366-getter|0|1366-preInit
- // write pre-init user code here
-okCommand23 = new Command("Datos del Operador", Command.OK, 0);//GEN-LINE:|1366-getter|1|1366-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1366-getter|2|
-        return okCommand23;
-    }
-//</editor-fold>//GEN-END:|1366-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand24 ">//GEN-BEGIN:|1368-getter|0|1368-preInit
-    /**
-     * Returns an initialized instance of okCommand24 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand24() {
-        if (okCommand24 == null) {
-//GEN-END:|1368-getter|0|1368-preInit
- // write pre-init user code here
-okCommand24 = new Command("Siguiente", Command.OK, 0);//GEN-LINE:|1368-getter|1|1368-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1368-getter|2|
-        return okCommand24;
-    }
-//</editor-fold>//GEN-END:|1368-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand25 ">//GEN-BEGIN:|1371-getter|0|1371-preInit
-    /**
-     * Returns an initialized instance of okCommand25 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand25() {
-        if (okCommand25 == null) {
-//GEN-END:|1371-getter|0|1371-preInit
- // write pre-init user code here
-okCommand25 = new Command("Imprimir Infraccion", Command.OK, 0);//GEN-LINE:|1371-getter|1|1371-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1371-getter|2|
-        return okCommand25;
-    }
-//</editor-fold>//GEN-END:|1371-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: listVehiculo ">//GEN-BEGIN:|1358-getter|0|1358-preInit
-    /**
-     * Returns an initialized instance of listVehiculo component.
-     *
-     * @return the initialized component instance
-     */
-    public List getListVehiculo() {
-        if (listVehiculo == null) {
-//GEN-END:|1358-getter|0|1358-preInit
- // write pre-init user code here
-listVehiculo = new List("Descripcion del Vehiculo", Choice.IMPLICIT);//GEN-BEGIN:|1358-getter|1|1358-postInit
-            listVehiculo.append("Tipo de Vehiculo:", null);
-            listVehiculo.append("Color:", null);
-            listVehiculo.append("Zona:", null);
-            listVehiculo.addCommand(getOkCommand29());
-            listVehiculo.addCommand(getOkCommand22());
-            listVehiculo.setCommandListener(this);
-            listVehiculo.setSelectedFlags(new boolean[]{false, false, false});//GEN-END:|1358-getter|1|1358-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1358-getter|2|
-        return listVehiculo;
-    }
-//</editor-fold>//GEN-END:|1358-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Method: listVehiculoAction ">//GEN-BEGIN:|1358-action|0|1358-preAction
-    /**
-     * Performs an action assigned to the selected list element in the
-     * listVehiculo component.
-     */
-    public void listVehiculoAction() {
-//GEN-END:|1358-action|0|1358-preAction
- // enter pre-action user code here
-String __selectedString = getListVehiculo().getString(getListVehiculo().getSelectedIndex());//GEN-BEGIN:|1358-action|1|1361-preAction
-        if (__selectedString != null) {
-            if (__selectedString.equals("Tipo de Vehiculo:")) {//GEN-END:|1358-action|1|1361-preAction
- // write pre-action user code here
-//GEN-LINE:|1358-action|2|1361-postAction
- // write post-action user code here
-} else if (__selectedString.equals("Color:")) {//GEN-LINE:|1358-action|3|1362-preAction
- // write pre-action user code here
-//GEN-LINE:|1358-action|4|1362-postAction
- // write post-action user code here
-} else if (__selectedString.equals("Zona:")) {//GEN-LINE:|1358-action|5|1423-preAction
- // write pre-action user code here
-//GEN-LINE:|1358-action|6|1423-postAction
- // write post-action user code here
-}//GEN-BEGIN:|1358-action|7|1358-postAction
-        }//GEN-END:|1358-action|7|1358-postAction
- // enter post-action user code here
-}//GEN-BEGIN:|1358-action|8|
-//</editor-fold>//GEN-END:|1358-action|8|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: formInfraccion ">//GEN-BEGIN:|1370-getter|0|1370-preInit
-    /**
-     * Returns an initialized instance of formInfraccion component.
-     *
-     * @return the initialized component instance
-     */
-    public Form getFormInfraccion() {
-        if (formInfraccion == null) {
-//GEN-END:|1370-getter|0|1370-preInit
- // write pre-init user code here
-formInfraccion = new Form("Infraccion", new Item[]{getTextField2(), getTextField4(), getTextField3()});//GEN-BEGIN:|1370-getter|1|1370-postInit
-            formInfraccion.addCommand(getImprimirFactura());
-            formInfraccion.setCommandListener(this);//GEN-END:|1370-getter|1|1370-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1370-getter|2|
-        return formInfraccion;
-    }
-//</editor-fold>//GEN-END:|1370-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField2 ">//GEN-BEGIN:|1374-getter|0|1374-preInit
-    /**
-     * Returns an initialized instance of textField2 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField2() {
-        if (textField2 == null) {
-//GEN-END:|1374-getter|0|1374-preInit
- // write pre-init user code here
-textField2 = new TextField("Codigo de Infraccion 1:", null, 32, TextField.NUMERIC);//GEN-LINE:|1374-getter|1|1374-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1374-getter|2|
-        return textField2;
-    }
-//</editor-fold>//GEN-END:|1374-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField3 ">//GEN-BEGIN:|1375-getter|0|1375-preInit
-    /**
-     * Returns an initialized instance of textField3 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField3() {
-        if (textField3 == null) {
-//GEN-END:|1375-getter|0|1375-preInit
- // write pre-init user code here
-textField3 = new TextField("Codigo de Agravante:", null, 32, TextField.NUMERIC);//GEN-LINE:|1375-getter|1|1375-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1375-getter|2|
-        return textField3;
-    }
-//</editor-fold>//GEN-END:|1375-getter|2|
-
-
-
-
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand26 ">//GEN-BEGIN:|1382-getter|0|1382-preInit
-    /**
-     * Returns an initialized instance of okCommand26 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand26() {
-        if (okCommand26 == null) {
-//GEN-END:|1382-getter|0|1382-preInit
- // write pre-init user code here
-okCommand26 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1382-getter|1|1382-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1382-getter|2|
-        return okCommand26;
-    }
-//</editor-fold>//GEN-END:|1382-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand27 ">//GEN-BEGIN:|1392-getter|0|1392-preInit
-    /**
-     * Returns an initialized instance of okCommand27 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand27() {
-        if (okCommand27 == null) {
-//GEN-END:|1392-getter|0|1392-preInit
- // write pre-init user code here
-okCommand27 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1392-getter|1|1392-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1392-getter|2|
-        return okCommand27;
-    }
-//</editor-fold>//GEN-END:|1392-getter|2|
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: formConductor ">//GEN-BEGIN:|1386-getter|0|1386-preInit
-    /**
-     * Returns an initialized instance of formConductor component.
-     *
-     * @return the initialized component instance
-     */
-    public Form getFormConductor() {
-        if (formConductor == null) {
-//GEN-END:|1386-getter|0|1386-preInit
- // write pre-init user code here
-            
-                    
-            formConductor = new Form("Datos del Infractor", new Item[]{getTextField8(), getTextField6(), getTextField7(), getTextField5()});//GEN-BEGIN:|1386-getter|1|1386-postInit
-            formConductor.addCommand(getOkCommand27());
-            formConductor.setCommandListener(this);//GEN-END:|1386-getter|1|1386-postInit
- 
-            
-            //#style horizontalChoice
-            group = new ChoiceGroup("Lugar de Procedencia:", ChoiceGroup.EXCLUSIVE );
-            //#style choiceItem
-            group.append( "LP", null );
-            //#style choiceItem
-            group.append( "SCZ", null );
-            //#style choiceItem
-            group.append( "CBA", null );
-            //#style choiceItem
-            group.append( "BNI", null );
-            //#style choiceItem
-            group.append( "CHQ", null );
-            //#style choiceItem
-            group.append( "ORU", null );
-            //#style choiceItem
-            group.append( "PND", null );
-            //#style choiceItem
-            group.append( "PSI", null );
-            //#style choiceItem
-            group.append( "TJA", null );    
-
-            formConductor.append( group );
-            
-        }//GEN-BEGIN:|1386-getter|2|
-        return formConductor;
-    }
-//</editor-fold>//GEN-END:|1386-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField6 ">//GEN-BEGIN:|1389-getter|0|1389-preInit
-    /**
-     * Returns an initialized instance of textField6 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField6() {
-        if (textField6 == null) {
-//GEN-END:|1389-getter|0|1389-preInit
- // write pre-init user code here
-textField6 = new TextField("Nombre:", null, 32, TextField.ANY);//GEN-LINE:|1389-getter|1|1389-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1389-getter|2|
-        return textField6;
-    }
-//</editor-fold>//GEN-END:|1389-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField7 ">//GEN-BEGIN:|1390-getter|0|1390-preInit
-    /**
-     * Returns an initialized instance of textField7 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField7() {
-        if (textField7 == null) {
-//GEN-END:|1390-getter|0|1390-preInit
- // write pre-init user code here
-textField7 = new TextField("Apellido Paterno:", null, 32, TextField.ANY);//GEN-LINE:|1390-getter|1|1390-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1390-getter|2|
-        return textField7;
-    }
-//</editor-fold>//GEN-END:|1390-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField8 ">//GEN-BEGIN:|1391-getter|0|1391-preInit
-    /**
-     * Returns an initialized instance of textField8 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField8() {
-        if (textField8 == null) {
-//GEN-END:|1391-getter|0|1391-preInit
- // write pre-init user code here
-textField8 = new TextField("CI:", null, 32, TextField.NUMERIC);//GEN-LINE:|1391-getter|1|1391-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1391-getter|2|
-        return textField8;
-    }
-//</editor-fold>//GEN-END:|1391-getter|2|
-
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand28 ">//GEN-BEGIN:|1399-getter|0|1399-preInit
+
     /**
      * Returns an initialized instance of okCommand28 component.
      *
@@ -3122,6 +1221,7 @@ okCommand28 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1399-getter|1|1399-po
  // write pre-init user code here
 formLogin = new Form("Autentificaci\u00F3n", new Item[]{getTextField9(), getTextField10()});//GEN-BEGIN:|1396-getter|1|1396-postInit
             formLogin.addCommand(getOkCommand28());
+            formLogin.addCommand(getExitCommand1());
             formLogin.setCommandListener(this);//GEN-END:|1396-getter|1|1396-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1396-getter|2|
@@ -3163,22 +1263,7 @@ textField10 = new TextField("Contrase\u00F1a:", null, 32, TextField.ANY | TextFi
     }
 //</editor-fold>//GEN-END:|1398-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand29 ">//GEN-BEGIN:|1402-getter|0|1402-preInit
-    /**
-     * Returns an initialized instance of okCommand29 component.
-     *
-     * @return the initialized component instance
-     */
-    public Command getOkCommand29() {
-        if (okCommand29 == null) {
-//GEN-END:|1402-getter|0|1402-preInit
- // write pre-init user code here
-okCommand29 = new Command("Seleccionar", Command.BACK, 0);//GEN-LINE:|1402-getter|1|1402-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1402-getter|2|
-        return okCommand29;
-    }
-//</editor-fold>//GEN-END:|1402-getter|2|
+
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Method: methodLogin ">//GEN-BEGIN:|1409-entry|0|1410-preAction
     /**
@@ -3191,114 +1276,48 @@ okCommand29 = new Command("Seleccionar", Command.BACK, 0);//GEN-LINE:|1402-gette
 //        String parametros= "UsrCod="+textField9.getString()+"&UsrPwd="+textField10.getString();
         pantalla = AUTENTIFICACION;
         System.out.print("entrando al comparador");
-        if(textField9.getString().equals("admin")&&textField10.getString().equals("adm"))
+        
+        usuario = new Usuario();
+//        usuario.setUsuario(getTextField9().getString());
+//        usuario.setPassword(getTextField10().getString());
+        usuario.setUsuario("oscar.conde");
+        usuario.setPassword("123");
+        
+        Cargando();
+        if(conexion!=null)
         {
-            switchDisplayable(null, getListAdministrador());
-            
+            conexion =null;
         }
-//        System.out.print("saliendo comparador");
-        else
-        {
-            int sw;
-            sw=0;
-            for(int i=0;i<vectorUsuarios.size();i++)
-            {
-                Usuarios u = (Usuarios) vectorUsuarios.elementAt(i);
-                if(u.getUser().equals(textField9.getString())&&u.getPassword().equals(textField10.getString()))
-                {
-                    sw=1;
-                    
-                    i=vectorUsuarios.size();
-                    autentificacion = new Autentificacion();
-                    autentificacion.setNombre(u.getUser());
-                    autentificacion.setUsrpwd(u.getPassword());
-                }
-            }
-                if(sw==1)
-                {
-                    cambiarPantalla();
-                }
-                else
-                {
-                    
-                    switchDisplayable(null, getFormLogin());
-                    
-                    switchDisplayable(getProblemas(), getFormLogin());
-                    
-                }
-            
-       }
-       
-//        Cargando();
-//        Thread t = new Thread()
-//        {
-//            public void run()
-//            {
-//                   
-//                System.out.println(" thred consumidor activo");
-//                if(rest.getCodigoRespuesta()==200)
-//                {   
-//                    
-//                    autentificacion = new Autentificacion(rest.getRespuesta());
-//                    
-//                    cambiarPantalla();
-//                    listMenu.setTitle("Usuario:"+autentificacion.getNombre());
-//                    //Cargando el titulo de la lista
-//                    
-//                }
-//                else
-//                {   
-//                    //Repinta la pantalla antes de que esta esetes
-//                    switchDisplayable(null, getFormLogin());
-//                    
-//                    switchDisplayable(getProblemas(), getFormLogin());
-//                }   
-//
-//            
-//            }
-//      
-//        };       
-//        
-//        conexion.EnviarGet(AUTENTIFICACION,parametros,t);
-//        conexion.Lenvantate();
-           
-/*        
-switchDisplayable (null, getListMenu ());//GEN-BEGIN:|1409-entry|1|1410-postAction
-//GEN-END:|1409-entry|1|1410-postAction
- */
-// write post-action user code here
-}//GEN-BEGIN:|1409-entry|2|
-//</editor-fold>//GEN-END:|1409-entry|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Method: methodActualizacion ">//GEN-BEGIN:|1413-entry|0|1414-preAction
-    /**
-     * Performs an action assigned to the methodActualizacion entry-point.
-     */
-    public void methodActualizacion() {
-//GEN-END:|1413-entry|0|1414-preAction
- // write pre-action user code here
-       pantalla = CONSULTA;
-       Cargando();
+     
+        conexion = new ConexionIpx();
+      
        
         Thread t = new Thread()
         {
             public void run()
             {
                    
-                System.out.println(" thred consumidor activo");
-                if(rest.getCodigoRespuesta()==200)
-                {   
-//                    consulta = new ConsutalDatos(rest.getRespuesta());
-                    consulta = new ConsultaDatos("{\"respond1\":{\"Colores\":{\"SDColores.SDColoresItem\":[{\"ColCod\":0,\"ColDes\":\"\"},{\"ColCod\":3,\"ColDes\":\"AMARILLO\"}]}},\"respond2\":{\"Tipos\":{\"SDTiposVehiculo.SDTiposVehiculoItem\":[{\"TipVehCod\":0,\"TipVehDes\":\"\"},{\"TipVehCod\":15,\"TipVehDes\":\"AUTOMOVIL\"},{\"TipVehCod\":4,\"TipVehDes\":\"BUS\"},{\"TipVehCod\":14,\"TipVehDes\":\"CAMION\"},{\"TipVehCod\":2,\"TipVehDes\":\"CARRY\"},{\"TipVehCod\":11,\"TipVehDes\":\"FURGON\"},{\"TipVehCod\":12,\"TipVehDes\":\"FURGONETA\"},{\"TipVehCod\":5,\"TipVehDes\":\"MICRO\"},{\"TipVehCod\":10,\"TipVehDes\":\"MICROBUS\"},{\"TipVehCod\":1,\"TipVehDes\":\"MINIBUS\"},{\"TipVehCod\":13,\"TipVehDes\":\"OMNIBUS\"},{\"TipVehCod\":16,\"TipVehDes\":\"TAXI\"},{\"TipVehCod\":3,\"TipVehDes\":\"TRUFI\"},{\"TipVehCod\":6,\"TipVehDes\":\"VAGONETA\"}]}},\"respond3\":{\"Zonas\":{\"RestZonas.RestZonasItem\":[{\"ZonCod\":643,\"ZonDes\":\"SIN REGISTRAR\",\"ZonEst\":\"S\"},{\"ZonCod\":14,\"ZonDes\":\"1 DE MAYO CONSTRUCTORES\",\"ZonEst\":\"S\"},{\"ZonCod\":7,\"ZonDes\":\"14 DE SEPTIEMBRE\",\"ZonEst\":\"S\"},{\"ZonCod\":15,\"ZonDes\":\"18 DE MARZO\",\"ZonEst\":\"S\"},{\"ZonCod\":10,\"ZonDes\":\"21 DE ENERO\",\"ZonEst\":\"S\"},{\"ZonCod\":13,\"ZonDes\":\"23 DE MARZO\",\"ZonEst\":\"S\"},{\"ZonCod\":325,\"ZonDes\":\"23 DE MARZO\",\"ZonEst\":\"S\"},{\"ZonCod\":37,\"ZonDes\":\"24 DE JUNIO \\\"A\\\"\",\"ZonEst\":\"S\"},{\"ZonCod\":60,\"ZonDes\":\"24 DE JUNIO \\\"B\\\"\",\"ZonEst\":\"S\"},{\"ZonCod\":83,\"ZonDes\":\"24 DE JUNIO SECTOR B\",\"ZonEst\":\"S\"}]}}}");
-//                    autentificacion = new Autentificacion(rest.getRespuesta());
-                    vectorVehiculo= consulta.getVectorVehiculo();
-                    vectorColores=consulta.getVectorColores();
-                    vectorZona=consulta.getVectorZona();
+                Log.i("Login "," thred consumidor activo");
+                if(conexion.getCodigoRespuesta()==200)
+                {
+                   String p = usuario.getPassword();
+                   usuario =null;
+                   usuario = Usuario.fromJson(conexion.getRespuesta());
+                   usuario.setPassword(p);
+                   cambiarPantalla();
+                   
+                   Log.i("metho Login", "infracciones total "+usuario.getInfracciones().size());
+                   
+                   //guardando usuario 
+                   
+                 
+                   
+                   
                     
-                    System.out.print("termino consumiendo");
-                    cambiarPantalla();
-//                    listMenu.setTitle("Usuario:"+autentificacion.getNombre());
-                    //Cargando el titulo de la lista
+                    //guardando sucursal
+                   
+                    
+                  
                     
                 }
                 else
@@ -3307,105 +1326,23 @@ switchDisplayable (null, getListMenu ());//GEN-BEGIN:|1409-entry|1|1410-postActi
                     switchDisplayable(null, getFormLogin());
                     switchDisplayable(getProblemas(), getFormLogin());
                 }   
-
+//                conexion = null;
             
             }
       
         };       
+        Log.i("llave de usuario", usuario.getUsuario()+" "+usuario.getPassword());
+        conexion.EnviarPost(ConexionIpx.AUTENTIFICAZION, usuario.toJson(), null, t);
+        conexion.start();
         
-        conexion.EnviarGet(CONSULTA,"",t);
-        conexion.Lenvantate();
-        /*
-switchDisplayable (null, getListAdministrador ());//GEN-BEGIN:|1413-entry|1|1414-postAction
-//GEN-END:|1413-entry|1|1414-postAction
+         
+/*        
+switchDisplayable (null, getFormGMT ());//GEN-BEGIN:|1409-entry|1|1410-postAction
+//GEN-END:|1409-entry|1|1410-postAction
  */
-    }//GEN-BEGIN:|1413-entry|2|
-//</editor-fold>//GEN-END:|1413-entry|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField11 ">//GEN-BEGIN:|1419-getter|0|1419-preInit
-    /**
-     * Returns an initialized instance of textField11 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField11() {
-        if (textField11 == null) {
-//GEN-END:|1419-getter|0|1419-preInit
- // write pre-init user code here
-textField11 = new TextField("Tipo de Via:", null, 32, TextField.ANY);//GEN-LINE:|1419-getter|1|1419-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1419-getter|2|
-        return textField11;
-    }
-//</editor-fold>//GEN-END:|1419-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField12 ">//GEN-BEGIN:|1420-getter|0|1420-preInit
-    /**
-     * Returns an initialized instance of textField12 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField12() {
-        if (textField12 == null) {
-//GEN-END:|1420-getter|0|1420-preInit
- // write pre-init user code here
-textField12 = new TextField("Calle:", null, 32, TextField.ANY);//GEN-LINE:|1420-getter|1|1420-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1420-getter|2|
-        return textField12;
-    }
-//</editor-fold>//GEN-END:|1420-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField4 ">//GEN-BEGIN:|1424-getter|0|1424-preInit
-    /**
-     * Returns an initialized instance of textField4 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField4() {
-        if (textField4 == null) {
-//GEN-END:|1424-getter|0|1424-preInit
- // write pre-init user code here
-textField4 = new TextField("Codigo de Infraccion 2:", null, 32, TextField.NUMERIC);//GEN-LINE:|1424-getter|1|1424-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1424-getter|2|
-        return textField4;
-    }
-//</editor-fold>//GEN-END:|1424-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField5 ">//GEN-BEGIN:|1425-getter|0|1425-preInit
-    /**
-     * Returns an initialized instance of textField5 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField5() {
-        if (textField5 == null) {
-//GEN-END:|1425-getter|0|1425-preInit
- // write pre-init user code here
-textField5 = new TextField("Apellido Materno:", null, 32, TextField.ANY);//GEN-LINE:|1425-getter|1|1425-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1425-getter|2|
-        return textField5;
-    }
-//</editor-fold>//GEN-END:|1425-getter|2|
-
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField13 ">//GEN-BEGIN:|1426-getter|0|1426-preInit
-    /**
-     * Returns an initialized instance of textField13 component.
-     *
-     * @return the initialized component instance
-     */
-    public TextField getTextField13() {
-        if (textField13 == null) {
-//GEN-END:|1426-getter|0|1426-preInit
- // write pre-init user code here
-textField13 = new TextField("Linea:", null, 32, TextField.NUMERIC);//GEN-LINE:|1426-getter|1|1426-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1426-getter|2|
-        return textField13;
-    }
-//</editor-fold>//GEN-END:|1426-getter|2|
+// write post-action user code here
+}//GEN-BEGIN:|1409-entry|2|
+//</editor-fold>//GEN-END:|1409-entry|2|
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Method: methodInfraccion ">//GEN-BEGIN:|1427-entry|0|1428-preAction
     /**
@@ -3415,54 +1352,9 @@ textField13 = new TextField("Linea:", null, 32, TextField.NUMERIC);//GEN-LINE:|1
 //GEN-END:|1427-entry|0|1428-preAction
  // write pre-action user code here
         pantalla = REGISTRARINFRACCION;
-        infcon.setFecha(DateUtil.getCurrentDate());
+//        infcon.setFecha(DateUtil.getCurrentDate());
         Cargando();
-        Thread t = new Thread()
-        {
-            public void run()
-            {
-                   
-                System.out.println(" thred consumidor activo");
-                if(rest.getCodigoRespuesta()==200)
-                {   
-                    infraccion = new Infraccion_1(rest.getRespuesta());
-//                   
-                    try {
-                     
-                        javax.microedition.lcdui.Image ImagenQr=ImprimirQr(infcon);
-                        BmpArray ba = new BmpArray();
-                        byte imagen[] =  ba.readImage(BMPGenerator.encodeBMP(ImagenQr));
-                        Imprimir(infraccion,infcon,imagen);
-                        cambiarPantalla();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    } 
-                    
-//                     Imprimir(infcon);
-//                    cambiarPantalla();
-                   
-//                    listMenu.setTitle("Usuario:"+autentificacion.getNombre());
-                    //Cargando el titulo de la lista
-                    //imprimr la infraccion
-                    
-                    
-                    
-                    
-                }
-                else
-                {   
-                    //Repinta la pantalla antes de que esta esetes
-                    switchDisplayable(null, getFormLogin());
-                    switchDisplayable(getProblemas(), getFormLogin());
-                }   
-
-            
-            }
-      
-        };       
-        
-        conexion.EnviarGet(REGISTRARINFRACCION,infcon.getConsulta(),t);
-        conexion.Lenvantate();
+       
         /*
 switchDisplayable (null, getListMenu ());//GEN-BEGIN:|1427-entry|1|1428-postAction
 //GEN-END:|1427-entry|1|1428-postAction
@@ -3472,24 +1364,286 @@ switchDisplayable (null, getListMenu ());//GEN-BEGIN:|1427-entry|1|1428-postActi
 }//GEN-BEGIN:|1427-entry|2|
 //</editor-fold>//GEN-END:|1427-entry|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand30 ">//GEN-BEGIN:|1439-getter|0|1439-preInit
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: exitCommand1 ">//GEN-BEGIN:|1460-getter|0|1460-preInit
     /**
-     * Returns an initialized instance of okCommand30 component.
+     * Returns an initialized instance of exitCommand1 component.
      *
      * @return the initialized component instance
      */
-    public Command getOkCommand30() {
-        if (okCommand30 == null) {
-//GEN-END:|1439-getter|0|1439-preInit
-            // write pre-init user code here
-okCommand30 = new Command("Salir", Command.BACK, 0);//GEN-LINE:|1439-getter|1|1439-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1439-getter|2|
-        return okCommand30;
+    public Command getExitCommand1() {
+        if (exitCommand1 == null) {
+//GEN-END:|1460-getter|0|1460-preInit
+ // write pre-init user code here
+exitCommand1 = new Command("Exit", Command.EXIT, 0);//GEN-LINE:|1460-getter|1|1460-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1460-getter|2|
+        return exitCommand1;
     }
-//</editor-fold>//GEN-END:|1439-getter|2|
+//</editor-fold>//GEN-END:|1460-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand3 ">//GEN-BEGIN:|1441-getter|0|1441-preInit
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand ">//GEN-BEGIN:|1464-getter|0|1464-preInit
+    /**
+     * Returns an initialized instance of okCommand component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getOkCommand() {
+        if (okCommand == null) {
+//GEN-END:|1464-getter|0|1464-preInit
+ // write pre-init user code here
+okCommand = new Command("ok", Command.OK, 0);//GEN-LINE:|1464-getter|1|1464-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1464-getter|2|
+        return okCommand;
+    }
+//</editor-fold>//GEN-END:|1464-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand ">//GEN-BEGIN:|1466-getter|0|1466-preInit
+    /**
+     * Returns an initialized instance of backCommand component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getBackCommand() {
+        if (backCommand == null) {
+//GEN-END:|1466-getter|0|1466-preInit
+ // write pre-init user code here
+backCommand = new Command("Cerrar Sesion", Command.BACK, 0);//GEN-LINE:|1466-getter|1|1466-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1466-getter|2|
+        return backCommand;
+    }
+//</editor-fold>//GEN-END:|1466-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: formInfractor ">//GEN-BEGIN:|1463-getter|0|1463-preInit
+    /**
+     * Returns an initialized instance of formInfractor component.
+     *
+     * @return the initialized component instance
+     */
+    public Form getFormInfractor() {
+        if (formInfractor == null) {
+//GEN-END:|1463-getter|0|1463-preInit
+ // write pre-init user code here
+formInfractor = new Form("Infracciones", new Item[]{getTxtPlaca(), getTxtRuta(), getTxtCI(), getTextField()});//GEN-BEGIN:|1463-getter|1|1463-postInit
+            formInfractor.addCommand(getOkCommand());
+            formInfractor.addCommand(getBackCommand());
+            formInfractor.setCommandListener(this);//GEN-END:|1463-getter|1|1463-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1463-getter|2|
+        return formInfractor;
+    }
+//</editor-fold>//GEN-END:|1463-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand1 ">//GEN-BEGIN:|1472-getter|0|1472-preInit
+    /**
+     * Returns an initialized instance of okCommand1 component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getOkCommand1() {
+        if (okCommand1 == null) {
+//GEN-END:|1472-getter|0|1472-preInit
+ // write pre-init user code here
+okCommand1 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1472-getter|1|1472-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1472-getter|2|
+        return okCommand1;
+    }
+//</editor-fold>//GEN-END:|1472-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand1 ">//GEN-BEGIN:|1474-getter|0|1474-preInit
+    /**
+     * Returns an initialized instance of backCommand1 component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getBackCommand1() {
+        if (backCommand1 == null) {
+//GEN-END:|1474-getter|0|1474-preInit
+ // write pre-init user code here
+backCommand1 = new Command("Back", Command.BACK, 0);//GEN-LINE:|1474-getter|1|1474-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1474-getter|2|
+        return backCommand1;
+    }
+//</editor-fold>//GEN-END:|1474-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txtPlaca ">//GEN-BEGIN:|1478-getter|0|1478-preInit
+    /**
+     * Returns an initialized instance of txtPlaca component.
+     *
+     * @return the initialized component instance
+     */
+    public TextField getTxtPlaca() {
+        if (txtPlaca == null) {
+//GEN-END:|1478-getter|0|1478-preInit
+ // write pre-init user code here
+txtPlaca = new TextField("Placa:", null, 32, TextField.ANY);//GEN-LINE:|1478-getter|1|1478-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1478-getter|2|
+        return txtPlaca;
+    }
+//</editor-fold>//GEN-END:|1478-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txtRuta ">//GEN-BEGIN:|1479-getter|0|1479-preInit
+    /**
+     * Returns an initialized instance of txtRuta component.
+     *
+     * @return the initialized component instance
+     */
+    public TextField getTxtRuta() {
+        if (txtRuta == null) {
+//GEN-END:|1479-getter|0|1479-preInit
+ // write pre-init user code here
+txtRuta = new TextField("Ruta:", null, 32, TextField.ANY);//GEN-LINE:|1479-getter|1|1479-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1479-getter|2|
+        return txtRuta;
+    }
+//</editor-fold>//GEN-END:|1479-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txtCI ">//GEN-BEGIN:|1480-getter|0|1480-preInit
+    /**
+     * Returns an initialized instance of txtCI component.
+     *
+     * @return the initialized component instance
+     */
+    public TextField getTxtCI() {
+        if (txtCI == null) {
+//GEN-END:|1480-getter|0|1480-preInit
+ // write pre-init user code here
+txtCI = new TextField("CI:", null, 32, TextField.ANY);//GEN-LINE:|1480-getter|1|1480-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1480-getter|2|
+        return txtCI;
+    }
+//</editor-fold>//GEN-END:|1480-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField ">//GEN-BEGIN:|1481-getter|0|1481-preInit
+    /**
+     * Returns an initialized instance of textField component.
+     *
+     * @return the initialized component instance
+     */
+    public TextField getTextField() {
+        if (textField == null) {
+//GEN-END:|1481-getter|0|1481-preInit
+ // write pre-init user code here
+textField = new TextField("Tipo:", null, 32, TextField.ANY);//GEN-LINE:|1481-getter|1|1481-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1481-getter|2|
+        return textField;
+    }
+//</editor-fold>//GEN-END:|1481-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: formGMT ">//GEN-BEGIN:|1470-getter|0|1470-preInit
+    /**
+     * Returns an initialized instance of formGMT component.
+     *
+     * @return the initialized component instance
+     */
+    public Form getFormGMT() {
+        if (formGMT == null) {
+//GEN-END:|1470-getter|0|1470-preInit
+ // write pre-init user code here
+formGMT = new Form("form");//GEN-BEGIN:|1470-getter|1|1470-postInit
+            formGMT.addCommand(getOkCommand1());
+            formGMT.addCommand(getBackCommand1());
+            formGMT.setCommandListener(this);//GEN-END:|1470-getter|1|1470-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1470-getter|2|
+        return formGMT;
+    }
+//</editor-fold>//GEN-END:|1470-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okAdicionar ">//GEN-BEGIN:|1485-getter|0|1485-preInit
+    /**
+     * Returns an initialized instance of okAdicionar component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getOkAdicionar() {
+        if (okAdicionar == null) {
+//GEN-END:|1485-getter|0|1485-preInit
+ // write pre-init user code here
+okAdicionar = new Command("Adicionar Infraccion", Command.OK, 0);//GEN-LINE:|1485-getter|1|1485-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1485-getter|2|
+        return okAdicionar;
+    }
+//</editor-fold>//GEN-END:|1485-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand2 ">//GEN-BEGIN:|1487-getter|0|1487-preInit
+    /**
+     * Returns an initialized instance of backCommand2 component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getBackCommand2() {
+        if (backCommand2 == null) {
+//GEN-END:|1487-getter|0|1487-preInit
+ // write pre-init user code here
+backCommand2 = new Command("Back", Command.BACK, 0);//GEN-LINE:|1487-getter|1|1487-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1487-getter|2|
+        return backCommand2;
+    }
+//</editor-fold>//GEN-END:|1487-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okBorrar ">//GEN-BEGIN:|1489-getter|0|1489-preInit
+    /**
+     * Returns an initialized instance of okBorrar component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getOkBorrar() {
+        if (okBorrar == null) {
+//GEN-END:|1489-getter|0|1489-preInit
+ // write pre-init user code here
+okBorrar = new Command("Borra Infraccion", Command.OK, 0);//GEN-LINE:|1489-getter|1|1489-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1489-getter|2|
+        return okBorrar;
+    }
+//</editor-fold>//GEN-END:|1489-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand4 ">//GEN-BEGIN:|1496-getter|0|1496-preInit
+    /**
+     * Returns an initialized instance of okCommand4 component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getOkCommand4() {
+        if (okCommand4 == null) {
+//GEN-END:|1496-getter|0|1496-preInit
+ // write pre-init user code here
+okCommand4 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1496-getter|1|1496-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1496-getter|2|
+        return okCommand4;
+    }
+//</editor-fold>//GEN-END:|1496-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: cancelCommand ">//GEN-BEGIN:|1500-getter|0|1500-preInit
+    /**
+     * Returns an initialized instance of cancelCommand component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getCancelCommand() {
+        if (cancelCommand == null) {
+//GEN-END:|1500-getter|0|1500-preInit
+ // write pre-init user code here
+cancelCommand = new Command("Cancel", Command.CANCEL, 0);//GEN-LINE:|1500-getter|1|1500-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1500-getter|2|
+        return cancelCommand;
+    }
+//</editor-fold>//GEN-END:|1500-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand3 ">//GEN-BEGIN:|1502-getter|0|1502-preInit
     /**
      * Returns an initialized instance of backCommand3 component.
      *
@@ -3497,153 +1651,124 @@ okCommand30 = new Command("Salir", Command.BACK, 0);//GEN-LINE:|1439-getter|1|14
      */
     public Command getBackCommand3() {
         if (backCommand3 == null) {
-//GEN-END:|1441-getter|0|1441-preInit
-            // write pre-init user code here
-backCommand3 = new Command("Seleccionar", Command.OK, 0);//GEN-LINE:|1441-getter|1|1441-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1441-getter|2|
+//GEN-END:|1502-getter|0|1502-preInit
+ // write pre-init user code here
+backCommand3 = new Command("Back", Command.BACK, 0);//GEN-LINE:|1502-getter|1|1502-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1502-getter|2|
         return backCommand3;
     }
-//</editor-fold>//GEN-END:|1441-getter|2|
+//</editor-fold>//GEN-END:|1502-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: listAdministrador ">//GEN-BEGIN:|1432-getter|0|1432-preInit
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: listSeleccionados ">//GEN-BEGIN:|1482-getter|0|1482-preInit
     /**
-     * Returns an initialized instance of listAdministrador component.
+     * Returns an initialized instance of listSeleccionados component.
      *
      * @return the initialized component instance
      */
-    public List getListAdministrador() {
-        if (listAdministrador == null) {
-//GEN-END:|1432-getter|0|1432-preInit
-            // write pre-init user code here
-listAdministrador = new List("Usuario Administrador", Choice.IMPLICIT);//GEN-BEGIN:|1432-getter|1|1432-postInit
-            listAdministrador.append("Actualizar Informacion", null);
-            listAdministrador.append("Actualizar Usuarios", null);
-            listAdministrador.addCommand(getOkCommand31());
-            listAdministrador.addCommand(getBackCommand4());
-            listAdministrador.setCommandListener(this);
-            listAdministrador.setSelectedFlags(new boolean[]{false, false});//GEN-END:|1432-getter|1|1432-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1432-getter|2|
-        return listAdministrador;
+    public List getListSeleccionados() {
+        if (listSeleccionados == null) {
+//GEN-END:|1482-getter|0|1482-preInit
+ // write pre-init user code here
+listSeleccionados = new List("list", Choice.IMPLICIT);//GEN-BEGIN:|1482-getter|1|1482-postInit
+            listSeleccionados.addCommand(getOkAdicionar());
+            listSeleccionados.addCommand(getOkBorrar());
+            listSeleccionados.addCommand(getBackCommand2());
+            listSeleccionados.setCommandListener(this);//GEN-END:|1482-getter|1|1482-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1482-getter|2|
+        return listSeleccionados;
     }
-//</editor-fold>//GEN-END:|1432-getter|2|
+//</editor-fold>//GEN-END:|1482-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Method: listAdministradorAction ">//GEN-BEGIN:|1432-action|0|1432-preAction
+//<editor-fold defaultstate="collapsed" desc=" Generated Method: listSeleccionadosAction ">//GEN-BEGIN:|1482-action|0|1482-preAction
     /**
      * Performs an action assigned to the selected list element in the
-     * listAdministrador component.
+     * listSeleccionados component.
      */
-    public void listAdministradorAction() {
-//GEN-END:|1432-action|0|1432-preAction
-        // enter pre-action user code here
-String __selectedString = getListAdministrador().getString(getListAdministrador().getSelectedIndex());//GEN-BEGIN:|1432-action|1|1435-preAction
-        if (__selectedString != null) {
-            if (__selectedString.equals("Actualizar Informacion")) {//GEN-END:|1432-action|1|1435-preAction
-                // write pre-action user code here
-methodActualizacion();//GEN-LINE:|1432-action|2|1435-postAction
-                // write post-action user code here
-} else if (__selectedString.equals("Actualizar Usuarios")) {//GEN-LINE:|1432-action|3|1436-preAction
-                // write pre-action user code here
-methodUsurios();//GEN-LINE:|1432-action|4|1436-postAction
-                // write post-action user code here
-}//GEN-BEGIN:|1432-action|5|1432-postAction
-        }//GEN-END:|1432-action|5|1432-postAction
-        // enter post-action user code here
-}//GEN-BEGIN:|1432-action|6|
-//</editor-fold>//GEN-END:|1432-action|6|
+    public void listSeleccionadosAction() {
+//GEN-END:|1482-action|0|1482-preAction
+ // enter pre-action user code here
+String __selectedString = getListSeleccionados().getString(getListSeleccionados().getSelectedIndex());//GEN-LINE:|1482-action|1|1482-postAction
+ // enter post-action user code here
+}//GEN-BEGIN:|1482-action|2|
+//</editor-fold>//GEN-END:|1482-action|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Method: methodUsurios ">//GEN-BEGIN:|1445-entry|0|1446-preAction
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: list ">//GEN-BEGIN:|1492-getter|0|1492-preInit
     /**
-     * Performs an action assigned to the methodUsurios entry-point.
+     * Returns an initialized instance of list component.
+     *
+     * @return the initialized component instance
      */
-    public void methodUsurios() {
-//GEN-END:|1445-entry|0|1446-preAction
-        // write pre-action user code here
-        pantalla = CONSULTAUSUARIOS;
-       Cargando();
-       
-        Thread t = new Thread()
-        {
-            public void run()
+    public List getList() {
+        if (list == null) {
+//GEN-END:|1492-getter|0|1492-preInit
+ // write pre-init user code here
+list = new List("list", Choice.IMPLICIT);//GEN-BEGIN:|1492-getter|1|1492-postInit
+            list.addCommand(getOkCommand4());
+            list.addCommand(getBackCommand3());
+            list.setCommandListener(this);
+            list.setSelectedFlags(new boolean[]{});//GEN-END:|1492-getter|1|1492-postInit
+ // write post-init user code here
+            Log.i("creandoce lista", " lista tamaño "+usuario.getInfracciones().size());
+//            list.append("nuevo item",null);
+            for(int i=0;i<usuario.getInfracciones().size();i++)
             {
-                   
-                System.out.println(" thred consumidor activo");
-                if(rest.getCodigoRespuesta()==200)
-                {   
-//                    consulta = new ConsutalDatos(rest.getRespuesta());
-                    usuarios = new ListaUsuarios("{\"respuesta\":{\"RestUsuarios.RestUsuariosItem\":[{\"User\":\"a\",\"Password\":\"123\"},{\"User\":\"abel.sirpa\",\"Password\":\"123\"},{\"User\":\"abigail.alconini\",\"Password\":\"123\"}]}}");
-                    
-                    vectorUsuarios=usuarios.getUsuarios();
-                    for(int i=0;i<vectorUsuarios.size();i++)
-                    {
-                        Usuarios u = (Usuarios) vectorUsuarios.elementAt(i);
-                        System.out.println("user:"+u.getUser()+" pass:"+u.getPassword());
-                    }    
-                        System.out.print("termino consumiendo usuarios");
-                    cambiarPantalla();
-//                    listMenu.setTitle("Usuario:"+autentificacion.getNombre());
-                    //Cargando el titulo de la lista
-                    
-                }
-                else
-                {   
-                    //Repinta la pantalla antes de que esta esetes
-                    switchDisplayable(null, getFormLogin());
-                    switchDisplayable(getProblemas(), getFormLogin());
-                }   
-
-            
+                Infraccion inf = (Infraccion) usuario.getInfracciones().elementAt(i);
+                list.append(inf.getCodigo(), null);
             }
-      
-        };       
-        
-        conexion.EnviarGet(CONSULTAUSUARIOS,"",t);
-        conexion.Lenvantate();
-        /*
-switchDisplayable (null, getListAdministrador ());//GEN-BEGIN:|1445-entry|1|1446-postAction
-//GEN-END:|1445-entry|1|1446-postAction
-        */
-        
-    }//GEN-BEGIN:|1445-entry|2|
-//</editor-fold>//GEN-END:|1445-entry|2|
+        }//GEN-BEGIN:|1492-getter|2|
+        return list;
+    }
+//</editor-fold>//GEN-END:|1492-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand31 ">//GEN-BEGIN:|1451-getter|0|1451-preInit
+//<editor-fold defaultstate="collapsed" desc=" Generated Method: listAction ">//GEN-BEGIN:|1492-action|0|1492-preAction
     /**
-     * Returns an initialized instance of okCommand31 component.
+     * Performs an action assigned to the selected list element in the list
+     * component.
+     */
+    public void listAction() {
+//GEN-END:|1492-action|0|1492-preAction
+ // enter pre-action user code here
+String __selectedString = getList().getString(getList().getSelectedIndex());//GEN-LINE:|1492-action|1|1492-postAction
+ // enter post-action user code here
+}//GEN-BEGIN:|1492-action|2|
+//</editor-fold>//GEN-END:|1492-action|2|
+
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand2 ">//GEN-BEGIN:|1512-getter|0|1512-preInit
+    /**
+     * Returns an initialized instance of okCommand2 component.
      *
      * @return the initialized component instance
      */
-    public Command getOkCommand31() {
-        if (okCommand31 == null) {
-//GEN-END:|1451-getter|0|1451-preInit
-            // write pre-init user code here
-okCommand31 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1451-getter|1|1451-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1451-getter|2|
-        return okCommand31;
+    public Command getOkCommand2() {
+        if (okCommand2 == null) {
+//GEN-END:|1512-getter|0|1512-preInit
+ // write pre-init user code here
+okCommand2 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1512-getter|1|1512-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1512-getter|2|
+        return okCommand2;
     }
-//</editor-fold>//GEN-END:|1451-getter|2|
+//</editor-fold>//GEN-END:|1512-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand4 ">//GEN-BEGIN:|1457-getter|0|1457-preInit
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: form ">//GEN-BEGIN:|1511-getter|0|1511-preInit
     /**
-     * Returns an initialized instance of backCommand4 component.
+     * Returns an initialized instance of form component.
      *
      * @return the initialized component instance
      */
-    public Command getBackCommand4() {
-        if (backCommand4 == null) {
-//GEN-END:|1457-getter|0|1457-preInit
-            // write pre-init user code here
-backCommand4 = new Command("Salir", Command.BACK, 0);//GEN-LINE:|1457-getter|1|1457-postInit
-            // write post-init user code here
-}//GEN-BEGIN:|1457-getter|2|
-        return backCommand4;
+    public Form getForm() {
+        if (form == null) {
+//GEN-END:|1511-getter|0|1511-preInit
+ // write pre-init user code here
+form = new Form("form");//GEN-LINE:|1511-getter|1|1511-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1511-getter|2|
+        return form;
     }
-//</editor-fold>//GEN-END:|1457-getter|2|
-
-
-
+//</editor-fold>//GEN-END:|1511-getter|2|
 
 
 public void Imprimir(Factura factura)
@@ -3742,59 +1867,59 @@ public void Imprimir(Factura factura)
 			}
                    
 }
-public void Imprimir(Infraccion_1 infraccion,Inf infcon, byte[] ImagenQr)
-{
-//     double monto = Double.parseDouble(factura.getAmount());
-                    imprimir = Printer.getInstance();
-                    switch (imprimir.getPaperStatus()) // check paper status
-			{
-			case Printer.PRINTER_EXIST_PAPER:
-				if (imprimir.voltageCheck()) // check voltage, if it is allowed to
-											// print
-				{
-                                    //Imprimiendo Factura
-                                    DeviceOps deviceOps = DeviceOps.getInstance();
-                                    imprimir.printBitmap(deviceOps.readImage("/FAC_ALE.bmp", 0));
+//public void Imprimir(Infraccion_1 infraccion,Inf infcon, byte[] ImagenQr)
+//{
+////     double monto = Double.parseDouble(factura.getAmount());
+//                    imprimir = Printer.getInstance();
+//                    switch (imprimir.getPaperStatus()) // check paper status
+//			{
+//			case Printer.PRINTER_EXIST_PAPER:
+//				if (imprimir.voltageCheck()) // check voltage, if it is allowed to
+//											// print
+//				{
+//                                    //Imprimiendo Factura
+//                                    DeviceOps deviceOps = DeviceOps.getInstance();
+//                                    imprimir.printBitmap(deviceOps.readImage("/FAC_ALE.bmp", 0));
+////                                 
+//                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
+//
+////                                    numMemo++;
+////                                    imprimir.printText(ConstruirFila(" MEMORANDUM No. "+infraccion.getNumeroInfraccion()), 1);
+////                                   imprimir.printText(ConstruirFila(" MEMORANDUM No. "+numMemo), 1);
+//                                   imprimir.printText("Fecha:"+DateUtil.getCurrentDate()+" "+DateUtil.getHour()+":"+DateUtil.getMinute(), 1);
+//
+//                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
 //                                 
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-
-                                    numMemo++;
-//                                    imprimir.printText(ConstruirFila(" MEMORANDUM No. "+infraccion.getNumeroInfraccion()), 1);
-                                   imprimir.printText(ConstruirFila(" MEMORANDUM No. "+numMemo), 1);
-                                   imprimir.printText("Fecha:"+DateUtil.getCurrentDate()+" "+DateUtil.getHour()+":"+DateUtil.getMinute(), 1);
-
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                 
-                                    imprimir.printText("PLACA:"+infcon.getPlacaLit()+" "+infcon.getPlacaNum(), 1);
-                                    imprimir.printText("VIA:"+infcon.getVia(), 1);
-                                    imprimir.printText("CODIGO DE INFRACCION:"+infcon.getInf1(), 1);
-                                    
-                                    imprimir.printText("CODIGO DE AGRAVANTE:"+infcon.getCodGrav(), 1);
-//                                    imprimir.printText("MONTO:"+infraccion.getMontoInfraccion(), 1);
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                 
-                                    imprimir.printBitmap(ImagenQr);
-                                    imprimir.printText("USUARIO:"+autentificacion.getNombre(),1);
-//                                   
-                                    imprimir.printEndLine();
-                       
-                                    
-                                    
-                                    
-				} else {
-					tickerLogin.setText("Bateria baja!! ");
-				
-				}
-				break;
-			case Printer.PRINTER_NO_PAPER:
-                                tickerLogin.setText("Verifique el estado del papel!! ");
-				break;
-			case Printer.PRINTER_PAPER_ERROR:
-                                tickerLogin.setText("Error de impresión!! ");
-				break;
-			}
-                   
-}
+//                                    imprimir.printText("PLACA:"+infcon.getPlacaLit()+" "+infcon.getPlacaNum(), 1);
+//                                    imprimir.printText("VIA:"+infcon.getVia(), 1);
+//                                    imprimir.printText("CODIGO DE INFRACCION:"+infcon.getInf1(), 1);
+//                                    
+//                                    imprimir.printText("CODIGO DE AGRAVANTE:"+infcon.getCodGrav(), 1);
+////                                    imprimir.printText("MONTO:"+infraccion.getMontoInfraccion(), 1);
+//                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
+//                                 
+//                                    imprimir.printBitmap(ImagenQr);
+//                                    imprimir.printText("USUARIO:"+autentificacion.getNombre(),1);
+////                                   
+//                                    imprimir.printEndLine();
+//                       
+//                                    
+//                                    
+//                                    
+//				} else {
+//					tickerLogin.setText("Bateria baja!! ");
+//				
+//				}
+//				break;
+//			case Printer.PRINTER_NO_PAPER:
+//                                tickerLogin.setText("Verifique el estado del papel!! ");
+//				break;
+//			case Printer.PRINTER_PAPER_ERROR:
+//                                tickerLogin.setText("Error de impresión!! ");
+//				break;
+//			}
+//                   
+//}
 public void Imprimir(Inf infcon)
 {
 //     double monto = Double.parseDouble(factura.getAmount());
@@ -4178,41 +2303,13 @@ public void Imprimir(Inf infcon)
     {
         switch(pantalla)
         {
-             case AUTENTIFICACION:
-                    switchDisplayable(null,getListMenu());
-                    break;
-             case CONSULTA:
-                    switchDisplayable(null,getListAdministrador());
-                    switchDisplayable(getProblemas(),getListAdministrador());
-                   
-                    break;
-             case CONSULTAUSUARIOS:
-                   switchDisplayable(null,getListAdministrador());
-                   switchDisplayable(getProblemas(),getListAdministrador());
-                   break;
+            case AUTENTIFICACION:
+                switchDisplayable(null,getFormGMT());
+                break;
              case REGISTRARINFRACCION:
                     switchDisplayable(null,getListMenu());
                     break;
-//             case CLIENTE:
-//                    switchDisplayable(null,getFormDatosCliente());
-//                    break;
-//             case GUARDARFACTURA:
-//                    switchDisplayable(null, getListPrincipal());
-//                    break;
-//             case CANTPROD:
-//                    switchDisplayable(null,getListProductos());
-//                    break;
-//             case REGISTRARCLIENTE:
-//                    switchDisplayable(null,getFormRegistro());
-//                    break;
-//             case PRERECARGA:
-////                 getFormRecarga
-//                    switchDisplayable(null,getFormRecarga());
-//                    break;
-//             case RECARGA:
-////                 getAppMenu
-//                 switchDisplayable(null,getAppMenu());
-//                   break;
+//            
         }
                     
     }
@@ -4223,14 +2320,9 @@ public void Imprimir(Inf infcon)
             case AUTENTIFICACION:
                 switchDisplayable(null,getFormLogin());
                 break;
-            case CONSULTA:
-                    switchDisplayable(null,getListAdministrador());
-                    break;   
-            case CONSULTAUSUARIOS:
-                    switchDisplayable(null,getListAdministrador());
-                    break;    
+            
             case REGISTRARINFRACCION:
-                    switchDisplayable(null,getFormInfraccion());
+//                    switchDisplayable(null,getFormInfraccion());
                     break;
 //            case CLIENTE:
 //                switchDisplayable(null,getFormCliente());
@@ -4629,192 +2721,18 @@ public void Imprimir(Inf infcon)
 //        
 //       
 //    }
-     public void openRecStore(){
-    try{
-      rs = RecordStore.openRecordStore(REC_STORE, true );
-    }catch (Exception e){}
-  }    
-
-  public void closeRecStore(){
-    try{
-      rs.closeRecordStore();
-    }catch (Exception e){}
-  }
-
-  public void deleteRecStore(){
-    if (RecordStore.listRecordStores() != null){
-      try{
-        RecordStore.deleteRecordStore(REC_STORE);
-      }catch (Exception e){}
-    }      
-  }
-
-  public void writeRecord(String str){
-    byte[] rec = str.getBytes();
-    try{
-      rs.addRecord(rec, 0, rec.length);
-    }catch (Exception e){}
-  }
-
-  public void readRecords(){
-    try{
-      byte[] recData = new byte[5]; 
-      int len;
-      
-      for(int i = 1; i <= rs.getNumRecords(); i++){
-        if(rs.getRecordSize(i) > recData.length){
-          recData = new byte[rs.getRecordSize(i)];
-        }
-        len = rs.getRecord(i, recData, 0);
-        
-        txt3.setText("Record " + i + " : " + new String(recData, 0, len));
-                              
-      }
-    }catch (Exception e){}
-  }
-   public FilteredList getFiltro() {
-        if (filtro == null) {
-                                     
-            // write pre-init user codeasdas here
-            filtro = new FilteredList("Nombre de la Via:",Choice.IMPLICIT); 
-//            lista = new List("list", Choice.IMPLICIT);                                        
-            filtro.addCommand(getOkFiltro());
-//            filtro.addCommand(getBackCommand());
-            filtro.setCommandListener(this);
-             
-
-            
-            for(int i=0;i<15;i++)
-            {
-                
-                filtro.append("via"+i,null);
-            }
-//            for(int i=0;i<cuenta.getProductos().size();i++)
-//            {
-//                Products prod = (Products) cuenta.getProductos().elementAt(i);
-//                lista.append(prod.getNotes(), null);
-//                lista.setTitle("Lista de Productos");
-//            }
-        }                           
-        return filtro;
-    }
-   public FilteredList getZona() {
-        if (zona == null) {
-                                     
-            // write pre-init user codeasdas here
-            zona = new FilteredList("Zona:",Choice.IMPLICIT); 
-//            lista = new List("list", Choice.IMPLICIT);                                        
-            zona.addCommand(getOkZona());
-//            filtro.addCommand(getBackCommand());
-            zona.setCommandListener(this);
-             
-            for(int i=0;i<vectorZona.size();i++)
-            {
-                Zona z =(Zona) vectorZona.elementAt(i);
-                zona.append(z.getZondes(),null);
-            }
-            //Cargando datos de la base de datos
-//            for(int i=0;i<15;i++)
-//            {
-//                
-//                zona.append("zona"+i,null);
-//            }
-//            for(int i=0;i<cuenta.getProductos().size();i++)
-//            {
-//                Products prod = (Products) cuenta.getProductos().elementAt(i);
-//                lista.append(prod.getNotes(), null);
-//                lista.setTitle("Lista de Productos");
-//            }
-        }                           
-        return zona;
-    }
-   public FilteredList getVehiculos()
+   public Vector getListaInfracciones()
    {
-       if(vehiculos==null)
+       if(listaInfracciones==null)
        {
-           vehiculos = new FilteredList("Vehiculos:",Choice.IMPLICIT);
-           vehiculos.addCommand(getOkVehiculo());
-          vehiculos.setCommandListener(this);
-          for( int i=0 ;i<vectorVehiculo.size();i++)
-          {
-              Vehiculo v =(Vehiculo) vectorVehiculo.elementAt(i);
-              vehiculos.append(v.getDesvehiculo(),null);
-          }
+           listaInfracciones = new Vector();
        }
-       return vehiculos;
+       return listaInfracciones;
    }
-     public Command getOkVehiculo() {
-        if (okVehiculo == null) {
-                                     
-            // write pre-init user code here
-           okVehiculo = new Command("Seleccionar", Command.OK, 0);                                       
-            // write post-init user code here
-           }                           
-        return okVehiculo;
-    }
-    public void Buscar(String text,Vector lista,int tipo)
-    {
-        switch(tipo)
-        {
-            case 0: for(int i=0;i<lista.size();i++)
-                    {
-                        Vehiculo vec = (Vehiculo) lista.elementAt(i);
-                        if(text.equals(vec.getDesvehiculo()))
-                        {
-                            i=lista.size();
-                            infcon.setVehiculo(vec.getCodvehiculo());
-                        }
-                        
-                    }
-                    break;
-            case 1: 
-                    for(int i=0;i<lista.size();i++)
-                    {
-                        Colores col = (Colores) lista.elementAt(i);
-//                         vec = (Vehiculo) lista.elementAt(i);
-                        if(text.equals(col.getColdes()))
-                        {
-                            i=lista.size();
-//                            infcon.setVehiculo(vec.getCodvehiculo());
-                            infcon.setCodColor(col.getCodcol());
-                        }
-                        
-                    }
-                    break;
-            case 2: for(int i=0;i<lista.size();i++)
-                    {
-//                        Vehiculo vec = (Vehiculo) lista.elementAt(i);
-                        Zona zon = (Zona) lista.elementAt(i);
-                        if(text.equals(zon.getZondes()))
-                        {
-                            i=lista.size();
-                            infcon.setCodZon(zon.getZoncod());
-                        }
-                        
-                    }
-                    break;
-                    
-        }
-    }
+    
     public void Limpiar()
     {
-        textField.setText("");
-        textField1.setText("");
-        textField11.setText("");
-        textField12.setText("");
-        textField13.setText("");
-        textField8.setText("");
-        textField6.setText("");
-        textField7.setText("");
-        textField5.setText("");
-        textField2.setText("");
-        textField4.setText("");
-        textField3.setText("");
-        listVehiculo.set(0, "Tipo de Vehiculo:", null);
-        listVehiculo.set(1, "Color:", null);
-        listVehiculo.set(0, "Zona:", null);
-
-        
+            
         
         
     }

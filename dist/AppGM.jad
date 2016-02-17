@@ -2,7 +2,7 @@ MIDlet-Name: AppGM
 MIDlet-Version: 1.0.0
 MIDlet-Vendor: IpxServer
 MIDlet-Jar-URL: AppGM.jar
-MIDlet-Jar-Size: 2962883
+MIDlet-Jar-Size: 2973399
 MIDlet-Description: A localized sample project
 MIDlet-Info-URL: http://localhost
 MIDlet-1: AppGM,/icon.png,com.mobiwire.startup.StartApp
