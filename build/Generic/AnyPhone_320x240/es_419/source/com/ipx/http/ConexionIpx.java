@@ -26,28 +26,14 @@ public class ConexionIpx extends Thread
 
     
     public static final String URL_AUTENTIFICACION = "/movilidad/model/servicios/autenticacion.php";
-    public static final String URL_LOGOUT ="/logoutPOS";
+    
 //    private final String URL_AUTENTIFICACION="http://nofunciona.org.zs";
-    public static final String URL_CLIENTE="/clientesPOS";
+    public static final String URL_REGISTRAR_INFRACCION="/movilidad/model/servicios/registrar.php";
     
-//    private final String URL_CLIENTES="http://192.168.1.10/cascada3/public/clientes/";
-//    public static final String URL_GUARDARFACTURA="/guardarFacturaOffline";
-     public static final String URL_GUARDARFACTURA="/pos";
-    
-    public static final String URL_VERSION="/version";
-    public static final String URL_REGISTRARCLIENTE="/registrarCliente";
-    public static final String URL_FACTURAS ="/facturas";
-    public static final String URL_PRINTFACTURA = "/printFactura/";
-    public static final String URL_GETFACTURA = "/obtenerFactura/";
+
       
    public static final int AUTENTIFICAZION=0;
-   public static final int CLIENTE=1;
-   public static final int GUARDARFACTURA=2;
-   public static final int VERSION=3;
-   public static final int REGISTRARCLIENTE=5;
-   public static final int FACTURAS=6;
-   public static final int PRINTFACTURA=7;
-   public static final int GETFACTURA=8;
+   public static final int REGISTRAR_INFRACCION=1;
  
     
     private String Respuesta=null;
@@ -106,49 +92,21 @@ public class ConexionIpx extends Thread
            
              switch(id)
             {
-                case -1:
-                     url=PROTOCOLO+SERVIDOR+URL_LOGOUT;
-                     EnviarRestGet(url);
-                    break;
+                
                 case AUTENTIFICAZION:
                     try{
                     url =PROTOCOLO+SERVIDOR+URL_AUTENTIFICACION;
                     EnviarRestPost(url,this.parametros);
                
-                     
-
                     }catch(Exception e){
                         System.out.println("Error al tratar  recoger los datos ");
                     }
                     break;
-                case CLIENTE:
-                    url = PROTOCOLO+SERVIDOR+URL_CLIENTE;
-                    EnviarRestGet(url);
-                    break;
-                case GUARDARFACTURA:
-                    url = PROTOCOLO+SERVIDOR+URL_GUARDARFACTURA;
+                case REGISTRAR_INFRACCION:
+                    url = PROTOCOLO+SERVIDOR+URL_REGISTRAR_INFRACCION;
                     EnviarRestPost(url,this.parametros);
                     break;
-                case VERSION:
-                    url=PROTOCOLO+SERVIDOR+URL_VERSION;
-                    EnviarRestGet(url+this.parametros);
-                    break;
-                case REGISTRARCLIENTE:
-                    url = PROTOCOLO+SERVIDOR+URL_REGISTRARCLIENTE;
-                    EnviarRestPost(url,parametros);
-                    break;
-                case FACTURAS:
-                    url = PROTOCOLO+SERVIDOR+URL_FACTURAS;
-                    EnviarRestGet(url);
-                    break;
-                case PRINTFACTURA:
-                    url = PROTOCOLO+SERVIDOR+URL_PRINTFACTURA;
-                    EnviarRestGet(url+this.parametros);
-                    break;
-                case GETFACTURA:
-                    url =PROTOCOLO+SERVIDOR+ URL_GETFACTURA;
-                    EnviarRestGet(url+this.parametros);
-                    break;
+                
                     
             }
   
@@ -217,13 +175,7 @@ public class ConexionIpx extends Thread
     }
     
     }
-//    public String getClave()
-//    {
-//        String llave_base64 = "Basic " + Base64.encode(this.llave);
-//        Log.i("Conexion ", "llave "+this.llave);
-////        Log.w("Conexion", "llave "+this.llave);
-//        return llave_base64;
-//    }
+
     public void EnviarRestPost(String url,String parametros)  throws IOException
     {
         HttpConnection httpConn = null;
@@ -231,7 +183,7 @@ public class ConexionIpx extends Thread
         InputStream is = null;
         OutputStream os = null;
 //        String authorizationHeader= "Basic " + Base64.encode(rest.getLlave());
-//        String authorizationHeader= "Basic " + Base64.encode(llave);
+
     try {
       // Open an HTTP Connection object
       httpConn = (HttpConnection)Connector.open(url);
@@ -340,53 +292,5 @@ public class ConexionIpx extends Thread
     {
         return this.parametros;
     }
-    public  static String getURL(int identificador)
-    {
-//          Respuesta = "vacio";
-        String url="";
-       
-           
-             switch(identificador)
-            {
-                case -1:
-                     url=PROTOCOLO+SERVIDOR+URL_LOGOUT;
-                
-                    break;
-                case AUTENTIFICAZION:
-                    
-                    url =PROTOCOLO+SERVIDOR+URL_AUTENTIFICACION;
-                   
-                    break;
-                case CLIENTE:
-                    url = PROTOCOLO+SERVIDOR+URL_CLIENTE;
-                   
-                    break;
-                case GUARDARFACTURA:
-                    url = PROTOCOLO+SERVIDOR+URL_GUARDARFACTURA;
-                  
-                    break;
-                case VERSION:
-                    url=PROTOCOLO+SERVIDOR+URL_VERSION;
-                   
-                    break;
-                case REGISTRARCLIENTE:
-                    url = PROTOCOLO+SERVIDOR+URL_REGISTRARCLIENTE;
-                    
-                    break;
-                case FACTURAS:
-                    url = PROTOCOLO+SERVIDOR+URL_FACTURAS;
-                  
-                    break;
-                case PRINTFACTURA:
-                    url = PROTOCOLO+SERVIDOR+URL_PRINTFACTURA;
-                   
-                    break;
-                case GETFACTURA:
-                    url =PROTOCOLO+SERVIDOR+ URL_GETFACTURA;
-                    
-                    break;
-                    
-            }
-             return url;
-    }
+    
 }

@@ -5,31 +5,14 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import com.ipx.http.ConectorRest;
-import com.ipx.http.Conexion;
 import com.ipx.http.ConexionIpx;
 import com.ipx.http.Rest;
-import com.ipx.http.switchDisplay;
 import com.ipx.json.Autentificacion;
-import com.ipx.json.Cliente;
-import com.ipx.json.Codigo;
-import com.ipx.json.Colores;
-import com.ipx.json.ConsultaCliente;
-import com.ipx.json.ConsultaDatos;
-import com.ipx.json.Cuenta;
 import com.ipx.json.Factura;
 import com.ipx.json.Inf;
 import com.ipx.json.InvoiceItems;
 import com.ipx.json.Products;
-import com.ipx.json.RecargaPos;
-import com.ipx.json.RegistroCliente;
-
-import com.ipx.json.Vehiculo;
-import com.ipx.json.Zona;
-import com.ipx.json.solicitudFactura;
 import com.ipx.util.BmpArray;
-import com.ipx.util.CharUtil;
-import com.ipx.util.CodigoDeControl;
 import com.ipx.util.DateUtil;
 import com.ipx.util.Log;
 import com.ipx.util.Numero_a_Letra;
@@ -37,28 +20,28 @@ import com.ipx.util.Tokenizer;
 import com.mobiwire.print.DeviceOps;
 import com.nbbse.printer.Printer;
 import com.sagereal.utils.BMPGenerator;
+import david.torrez.salinas.Boleta;
 import david.torrez.salinas.Infraccion;
+import david.torrez.salinas.Infractor;
 import david.torrez.salinas.Usuario;
-import de.enough.polish.io.RmsStorage;
+
 import de.enough.polish.ui.*;
 //import de.enough.polish.ui.TableItem;
 import de.enough.polish.ui.SplashScreen;
-import de.enough.polish.util.TableData;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;  
-import java.util.Hashtable;
 import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.lcdui.Image;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
-import javax.microedition.rms.RecordStore;
 import net.sf.microlog.core.Logger;
 import net.sf.microlog.core.LoggerFactory;
 import net.sf.microlog.core.PropertyConfigurator;
+import org.json.me.JSONArray;
+import org.json.me.JSONException;
+import org.json.me.JSONObject;
 import org.netbeans.microedition.util.SimpleCancellableTask;
 
 
@@ -79,7 +62,7 @@ public class StartApp extends MIDlet implements CommandListener {
     private final int REGISTRARINFRACCION=11;
     private final int CONSULTAUSUARIOS=12;
     
-    private final RmsStorage storage;
+    
     
     private boolean midletPaused = false;
     //variables de comunicacion
@@ -108,9 +91,6 @@ public class StartApp extends MIDlet implements CommandListener {
    
     private static final int BACK = 0xFF000000;
     private static final int WHTIE = 0xFFFFFFFF;
-    //* rms de prueba*/
-    private RecordStore rs = null;
-    static final String REC_STORE = "MIrms";
     //variable para el filtro
     
     private Command okZona;
@@ -127,20 +107,22 @@ public class StartApp extends MIDlet implements CommandListener {
 
     public Usuario usuario;
     public Vector listaInfracciones;
+    
+    public Infractor infractor;
 
 //    private Thread t;
 //<editor-fold defaultstate="collapsed" desc=" Generated Fields ">//GEN-BEGIN:|fields|0|
     private Command okLogin;
     private Command okCommand28;
     private Command exitCommand;
-    private Command okBorrar;
     private Command stopCommand;
+    private Command okBorrar;
     private Command backCommand3;
     private Command cancelCommand;
     private Command okCommand4;
     private Command backCommand1;
-    private Command okCommand1;
     private Command screenCommand;
+    private Command okCommand1;
     private Command backCommand2;
     private Command okAdicionar;
     private Command back;
@@ -149,6 +131,10 @@ public class StartApp extends MIDlet implements CommandListener {
     private Command exitCommand1;
     private Command okCommand;
     private Command backCommand;
+    private Command backInfraccion;
+    private Command okCommand3;
+    private Command okCommand5;
+    private Command backCommand4;
     private SplashScreen splashScreen;
     private Form formLogin;
     private TextField textField9;
@@ -161,10 +147,10 @@ public class StartApp extends MIDlet implements CommandListener {
     private Form formInfractor;
     private TextField txtRuta;
     private TextField txtPlaca;
-    private TextField textField;
+    private TextField txtTipo;
     private TextField txtCI;
-    private Form formGMT;
     private Alert Problemas;
+    private List listPrincipal;
     private Image image;
     private Ticker ticker;
     private SimpleCancellableTask task1;
@@ -184,10 +170,13 @@ public class StartApp extends MIDlet implements CommandListener {
     private Image image3;
     private Image image10;
     private Ticker ticker1;
-    private Font font;
     private Image image5;
+    private Font font;
     private Image image6;
     private Image image7;
+    private Image image16;
+    private Image image17;
+    private Image image18;
 //</editor-fold>//GEN-END:|fields|0|
 
     //SMS ENVIO
@@ -198,21 +187,7 @@ public class StartApp extends MIDlet implements CommandListener {
         // configuration for the logger
         PropertyConfigurator.configure();
          // restore notes from record store:
-		this.storage = new RmsStorage();
-                try {
-			vectorUsuarios = (Vector) this.storage.read("Usuarios");
-			vectorZona = (Vector) this.storage.read("Zonas");
-                        vectorVehiculo = (Vector) this.storage.read("Vehiculo");
-                        vectorColores = (Vector) this.storage.read("Color");
-		} catch (IOException e) {
-			// storage does not yet exist
-                  
-			vectorUsuarios = new Vector();
-                        vectorZona = new Vector();
-                        vectorVehiculo = new Vector();
-                        vectorColores =new Vector();
-                        
-		}
+		
         logme.info("Midlet started.");
     }
 
@@ -333,98 +308,114 @@ switchDisplayable(null, getSplashScreen());//GEN-LINE:|3-startMIDlet|1|3-postAct
 //GEN-END:|7-commandAction|0|7-preCommandAction
         // write pre-action user code here
 
-        if (displayable == formGMT) {//GEN-BEGIN:|7-commandAction|1|1475-preAction
-            if (command == backCommand1) {//GEN-END:|7-commandAction|1|1475-preAction
+        if (displayable == formInfractor) {//GEN-BEGIN:|7-commandAction|1|1465-preAction
+            if (command == okCommand) {//GEN-END:|7-commandAction|1|1465-preAction
  // write pre-action user code here
-switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|2|1475-postAction
+    
+                switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|2|1465-postAction
  // write post-action user code here
-} else if (command == okCommand1) {//GEN-LINE:|7-commandAction|3|1473-preAction
+    infractor = new Infractor();
+    infractor.setCi(getTxtCI().getText());
+    infractor.setPlaca(getTxtPlaca().getText());
+    infractor.setRuta(getTxtRuta().getText());
+    infractor.setTipo(getTxtTipo().getText());
+    
+            } else if (command == okCommand3) {//GEN-LINE:|7-commandAction|3|1523-preAction
  // write pre-action user code here
-switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|4|1473-postAction
+switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|4|1523-postAction
  // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|5|1467-preAction
-        } else if (displayable == formInfractor) {
-            if (command == backCommand) {//GEN-END:|7-commandAction|5|1467-preAction
- // write pre-action user code here
-switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|6|1467-postAction
- // write post-action user code here
-} else if (command == okCommand) {//GEN-LINE:|7-commandAction|7|1465-preAction
- // write pre-action user code here
-switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|8|1465-postAction
- // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|9|1461-preAction
+}//GEN-BEGIN:|7-commandAction|5|1461-preAction
         } else if (displayable == formLogin) {
-            if (command == exitCommand1) {//GEN-END:|7-commandAction|9|1461-preAction
+            if (command == exitCommand1) {//GEN-END:|7-commandAction|5|1461-preAction
  // write pre-action user code here
-exitMIDlet();//GEN-LINE:|7-commandAction|10|1461-postAction
+exitMIDlet();//GEN-LINE:|7-commandAction|6|1461-postAction
  // write post-action user code here
-} else if (command == okCommand28) {//GEN-LINE:|7-commandAction|11|1400-preAction
+} else if (command == okCommand28) {//GEN-LINE:|7-commandAction|7|1400-preAction
  // write pre-action user code here
-methodLogin();//GEN-LINE:|7-commandAction|12|1400-postAction
+methodLogin();//GEN-LINE:|7-commandAction|8|1400-postAction
  // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|13|1493-preAction
+}//GEN-BEGIN:|7-commandAction|9|1493-preAction
         } else if (displayable == list) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|13|1493-preAction
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|9|1493-preAction
  // write pre-action user code here
-listAction();//GEN-LINE:|7-commandAction|14|1493-postAction
+listAction();//GEN-LINE:|7-commandAction|10|1493-postAction
  // write post-action user code here
-} else if (command == backCommand3) {//GEN-LINE:|7-commandAction|15|1503-preAction
+} else if (command == backCommand3) {//GEN-LINE:|7-commandAction|11|1503-preAction
  // write pre-action user code here
-switchDisplayable(null, getListSeleccionados());//GEN-LINE:|7-commandAction|16|1503-postAction
+switchDisplayable(null, getListSeleccionados());//GEN-LINE:|7-commandAction|12|1503-postAction
  // write post-action user code here
-} else if (command == okCommand4) {//GEN-LINE:|7-commandAction|17|1497-preAction
+} else if (command == okCommand4) {//GEN-LINE:|7-commandAction|13|1497-preAction
  // write pre-action user code here
     
     
-                switchDisplayable(null, getListSeleccionados());//GEN-LINE:|7-commandAction|18|1497-postAction
+                switchDisplayable(null, getListSeleccionados());//GEN-LINE:|7-commandAction|14|1497-postAction
  // write post-action user code here
 //adicionando infracciones a la lista de infracciones
     Infraccion infraccion =(Infraccion) usuario.getInfracciones().elementAt(getList().getSelectedIndex());
     getListaInfracciones().addElement(infraccion);
     getListSeleccionados().append(infraccion.getCodigo(),null);
-            }//GEN-BEGIN:|7-commandAction|19|1155-preAction
+            }//GEN-BEGIN:|7-commandAction|15|1155-preAction
         } else if (displayable == listMenu) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|19|1155-preAction
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|15|1155-preAction
                 // write pre-action user code here
-listMenuAction();//GEN-LINE:|7-commandAction|20|1155-postAction
+listMenuAction();//GEN-LINE:|7-commandAction|16|1155-postAction
                 // write post-action user code here
-} else if (command == okMenu) {//GEN-LINE:|7-commandAction|21|1161-preAction
+} else if (command == backInfraccion) {//GEN-LINE:|7-commandAction|17|1520-preAction
+ // write pre-action user code here
+methodInfraccion();//GEN-LINE:|7-commandAction|18|1520-postAction
+ // write post-action user code here
+} else if (command == okMenu) {//GEN-LINE:|7-commandAction|19|1161-preAction
                 // write pre-action user code here
-listMenuAction();//GEN-LINE:|7-commandAction|22|1161-postAction
+listMenuAction();//GEN-LINE:|7-commandAction|20|1161-postAction
                 // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|23|1483-preAction
+}//GEN-BEGIN:|7-commandAction|21|1526-preAction
+        } else if (displayable == listPrincipal) {
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|21|1526-preAction
+ // write pre-action user code here
+listPrincipalAction();//GEN-LINE:|7-commandAction|22|1526-postAction
+ // write post-action user code here
+} else if (command == backCommand4) {//GEN-LINE:|7-commandAction|23|1534-preAction
+ // write pre-action user code here
+switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|24|1534-postAction
+ // write post-action user code here
+} else if (command == okCommand5) {//GEN-LINE:|7-commandAction|25|1530-preAction
+ // write pre-action user code here
+listPrincipalAction();//GEN-LINE:|7-commandAction|26|1530-postAction
+ // write post-action user code here
+}//GEN-BEGIN:|7-commandAction|27|1483-preAction
         } else if (displayable == listSeleccionados) {
-            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|23|1483-preAction
+            if (command == List.SELECT_COMMAND) {//GEN-END:|7-commandAction|27|1483-preAction
  // write pre-action user code here
-listSeleccionadosAction();//GEN-LINE:|7-commandAction|24|1483-postAction
+listSeleccionadosAction();//GEN-LINE:|7-commandAction|28|1483-postAction
  // write post-action user code here
-} else if (command == backCommand2) {//GEN-LINE:|7-commandAction|25|1488-preAction
+} else if (command == backCommand2) {//GEN-LINE:|7-commandAction|29|1488-preAction
  // write pre-action user code here
-switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|26|1488-postAction
+switchDisplayable(null, getListMenu());//GEN-LINE:|7-commandAction|30|1488-postAction
  // write post-action user code here
-} else if (command == okAdicionar) {//GEN-LINE:|7-commandAction|27|1486-preAction
+} else if (command == okAdicionar) {//GEN-LINE:|7-commandAction|31|1486-preAction
  // write pre-action user code here
-switchDisplayable(null, getList());//GEN-LINE:|7-commandAction|28|1486-postAction
+switchDisplayable(null, getList());//GEN-LINE:|7-commandAction|32|1486-postAction
  // write post-action user code here
-} else if (command == okBorrar) {//GEN-LINE:|7-commandAction|29|1490-preAction
+} else if (command == okBorrar) {//GEN-LINE:|7-commandAction|33|1490-preAction
  // write pre-action user code here
     getListaInfracciones().removeElementAt(getListSeleccionados().getSelectedIndex());
     getListSeleccionados().delete(getListSeleccionados().getSelectedIndex());
-//GEN-LINE:|7-commandAction|30|1490-postAction
+//GEN-LINE:|7-commandAction|34|1490-postAction
  // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|31|24-preAction
+}//GEN-BEGIN:|7-commandAction|35|24-preAction
         } else if (displayable == splashScreen) {
-            if (command == SplashScreen.DISMISS_COMMAND) {//GEN-END:|7-commandAction|31|24-preAction
+            if (command == SplashScreen.DISMISS_COMMAND) {//GEN-END:|7-commandAction|35|24-preAction
                 // write pre-action user code here
-switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|32|24-postAction
+switchDisplayable(null, getFormLogin());//GEN-LINE:|7-commandAction|36|24-postAction
                 // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|33|7-postCommandAction
-        }//GEN-END:|7-commandAction|33|7-postCommandAction
+}//GEN-BEGIN:|7-commandAction|37|7-postCommandAction
+        }//GEN-END:|7-commandAction|37|7-postCommandAction
        
         
 // write post-action user code here
-}//GEN-BEGIN:|7-commandAction|34|
-//</editor-fold>//GEN-END:|7-commandAction|34|
+}//GEN-BEGIN:|7-commandAction|38|
+//</editor-fold>//GEN-END:|7-commandAction|38|
+
 
 
 
@@ -881,10 +872,11 @@ okMenu = new Command("OK", Command.OK, 0);//GEN-LINE:|1160-getter|1|1160-postIni
 //GEN-END:|1154-getter|0|1154-preInit
             // write pre-init user code here
             
-            listMenu = new List("list", Choice.IMPLICIT);//GEN-BEGIN:|1154-getter|1|1154-postInit
-            listMenu.append("1) Datos del Infractor", null);
-            listMenu.append("2) Infracciones", null);
+            listMenu = new List("Menu", Choice.IMPLICIT);//GEN-BEGIN:|1154-getter|1|1154-postInit
+            listMenu.append(" Datos del Infractor", getImage17());
+            listMenu.append(" Infracciones", getImage18());
             listMenu.addCommand(getOkMenu());
+            listMenu.addCommand(getBackInfraccion());
             listMenu.setCommandListener(this);
             listMenu.setSelectedFlags(new boolean[]{false, false});//GEN-END:|1154-getter|1|1154-postInit
             // write post-init user code here
@@ -905,7 +897,7 @@ okMenu = new Command("OK", Command.OK, 0);//GEN-LINE:|1160-getter|1|1160-postIni
         // enter pre-action user code here
 String __selectedString = getListMenu().getString(getListMenu().getSelectedIndex());//GEN-BEGIN:|1154-action|1|1158-preAction
         if (__selectedString != null) {
-            if (__selectedString.equals("1) Datos del Infractor")) {//GEN-END:|1154-action|1|1158-preAction
+            if (__selectedString.equals(" Datos del Infractor")) {//GEN-END:|1154-action|1|1158-preAction
                 // write pre-action user code here
 switchDisplayable(null, getFormInfractor());//GEN-LINE:|1154-action|2|1158-postAction
                 // write post-action user code here
@@ -914,7 +906,7 @@ switchDisplayable(null, getFormInfractor());//GEN-LINE:|1154-action|2|1158-postA
 //                  infraccion.setNombreagente(textField9.getString());
                
                   Limpiar();
-            } else if (__selectedString.equals("2) Infracciones")) {//GEN-LINE:|1154-action|3|1159-preAction
+            } else if (__selectedString.equals(" Infracciones")) {//GEN-LINE:|1154-action|3|1159-preAction
                 // write pre-action user code here
 switchDisplayable(null, getListSeleccionados());//GEN-LINE:|1154-action|4|1159-postAction
                 // wr
@@ -1278,10 +1270,10 @@ textField10 = new TextField("Contrase\u00F1a:", null, 32, TextField.ANY | TextFi
         System.out.print("entrando al comparador");
         
         usuario = new Usuario();
-//        usuario.setUsuario(getTextField9().getString());
-//        usuario.setPassword(getTextField10().getString());
-        usuario.setUsuario("oscar.conde");
-        usuario.setPassword("123");
+        usuario.setUsuario(getTextField9().getString());
+        usuario.setPassword(getTextField10().getString());
+//        usuario.setUsuario("oscar.conde");
+//        usuario.setPassword("123");
         
         Cargando();
         if(conexion!=null)
@@ -1304,6 +1296,7 @@ textField10 = new TextField("Contrase\u00F1a:", null, 32, TextField.ANY | TextFi
                    usuario =null;
                    usuario = Usuario.fromJson(conexion.getRespuesta());
                    usuario.setPassword(p);
+                   
                    cambiarPantalla();
                    
                    Log.i("metho Login", "infracciones total "+usuario.getInfracciones().size());
@@ -1337,7 +1330,7 @@ textField10 = new TextField("Contrase\u00F1a:", null, 32, TextField.ANY | TextFi
         
          
 /*        
-switchDisplayable (null, getFormGMT ());//GEN-BEGIN:|1409-entry|1|1410-postAction
+switchDisplayable (null, getListPrincipal ());//GEN-BEGIN:|1409-entry|1|1410-postAction
 //GEN-END:|1409-entry|1|1410-postAction
  */
 // write post-action user code here
@@ -1351,13 +1344,89 @@ switchDisplayable (null, getFormGMT ());//GEN-BEGIN:|1409-entry|1|1410-postActio
     public void methodInfraccion() {
 //GEN-END:|1427-entry|0|1428-preAction
  // write pre-action user code here
+        
         pantalla = REGISTRARINFRACCION;
-//        infcon.setFecha(DateUtil.getCurrentDate());
-        Cargando();
+        
+//        Cargando();
+        
+        if(infractor!=null && getListaInfracciones().size()>0)
+        {
+            JSONObject json = new JSONObject();
+            try {
+                json.put("placa", infractor.getPlaca());
+                json.put("ruta", infractor.getRuta());
+                json.put("ci", infractor.getCi());
+                json.put("tipo", infractor.getTipo());
+                json.put("idusuario", usuario.getId());
+                
+                JSONArray array = new JSONArray();
+                for(int i=0;i<getListaInfracciones().size();i++)
+                {
+                    Infraccion inf = (Infraccion) getListaInfracciones().elementAt(i);
+                    JSONObject j = new JSONObject();
+                    j.put("inf_codigo", inf.getCodigo());
+                    j.put("agravante", "0");
+                    array.put(j);
+                }
+                json.put("infracciones", array);
+                Log.i("resgistro servidor", json.toString());
+                
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+            }
+            
+            Cargando();
+            
+            if(conexion!=null)
+            {
+                conexion =null;
+            }
+
+            conexion = new ConexionIpx();
+
+
+            Thread t = new Thread()
+            {
+                public void run()
+                {
+
+                    Log.i("Infraccion "," thred consumidor activo");
+                    if(conexion.getCodigoRespuesta()==200)
+                    {
+                        Boleta boleta = Boleta.fromJson(conexion.getRespuesta());
+                       Log.i("respuesta del servidor", conexion.getRespuesta());
+                       cambiarPantalla();
+
+                       Log.i("metho Infraccion", "infracciones total "+usuario.getInfracciones().size());
+
+                       Imprimir(boleta);
+                        //guardando sucursal
+                       
+
+
+
+                    }
+                    else
+                    {   
+                        //Repinta la pantalla antes de que esta esetes
+                        switchDisplayable(null, getListMenu());
+                        switchDisplayable(getProblemas(), getListMenu());
+                    }   
+    //                conexion = null;
+
+                }
+
+            };       
+            Log.i("llave de usuario", usuario.getUsuario()+" "+usuario.getPassword());
+            conexion.EnviarPost(ConexionIpx.REGISTRAR_INFRACCION, json.toString(), null, t);
+            conexion.start();
+            
+            
+        }
+        
        
         /*
-switchDisplayable (null, getListMenu ());//GEN-BEGIN:|1427-entry|1|1428-postAction
-//GEN-END:|1427-entry|1|1428-postAction
+//GEN-LINE:|1427-entry|1|1428-postAction
         */
         
         // write post-action user code here
@@ -1426,9 +1495,9 @@ backCommand = new Command("Cerrar Sesion", Command.BACK, 0);//GEN-LINE:|1466-get
         if (formInfractor == null) {
 //GEN-END:|1463-getter|0|1463-preInit
  // write pre-init user code here
-formInfractor = new Form("Infracciones", new Item[]{getTxtPlaca(), getTxtRuta(), getTxtCI(), getTextField()});//GEN-BEGIN:|1463-getter|1|1463-postInit
+formInfractor = new Form("Datos del Infractor", new Item[]{getTxtPlaca(), getTxtRuta(), getTxtCI(), getTxtTipo()});//GEN-BEGIN:|1463-getter|1|1463-postInit
             formInfractor.addCommand(getOkCommand());
-            formInfractor.addCommand(getBackCommand());
+            formInfractor.addCommand(getOkCommand3());
             formInfractor.setCommandListener(this);//GEN-END:|1463-getter|1|1463-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1463-getter|2|
@@ -1446,7 +1515,7 @@ formInfractor = new Form("Infracciones", new Item[]{getTxtPlaca(), getTxtRuta(),
         if (okCommand1 == null) {
 //GEN-END:|1472-getter|0|1472-preInit
  // write pre-init user code here
-okCommand1 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1472-getter|1|1472-postInit
+okCommand1 = new Command("Nueva Infraccion", Command.OK, 0);//GEN-LINE:|1472-getter|1|1472-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1472-getter|2|
         return okCommand1;
@@ -1463,7 +1532,7 @@ okCommand1 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1472-getter|1|1472-pos
         if (backCommand1 == null) {
 //GEN-END:|1474-getter|0|1474-preInit
  // write pre-init user code here
-backCommand1 = new Command("Back", Command.BACK, 0);//GEN-LINE:|1474-getter|1|1474-postInit
+backCommand1 = new Command("Cerrar Sesion", Command.BACK, 0);//GEN-LINE:|1474-getter|1|1474-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1474-getter|2|
         return backCommand1;
@@ -1497,7 +1566,7 @@ txtPlaca = new TextField("Placa:", null, 32, TextField.ANY);//GEN-LINE:|1478-get
         if (txtRuta == null) {
 //GEN-END:|1479-getter|0|1479-preInit
  // write pre-init user code here
-txtRuta = new TextField("Ruta:", null, 32, TextField.ANY);//GEN-LINE:|1479-getter|1|1479-postInit
+txtRuta = new TextField("Ruta:", null, 32, TextField.NUMERIC);//GEN-LINE:|1479-getter|1|1479-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1479-getter|2|
         return txtRuta;
@@ -1514,49 +1583,31 @@ txtRuta = new TextField("Ruta:", null, 32, TextField.ANY);//GEN-LINE:|1479-gette
         if (txtCI == null) {
 //GEN-END:|1480-getter|0|1480-preInit
  // write pre-init user code here
-txtCI = new TextField("CI:", null, 32, TextField.ANY);//GEN-LINE:|1480-getter|1|1480-postInit
+txtCI = new TextField("CI:", null, 32, TextField.NUMERIC);//GEN-LINE:|1480-getter|1|1480-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1480-getter|2|
         return txtCI;
     }
 //</editor-fold>//GEN-END:|1480-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: textField ">//GEN-BEGIN:|1481-getter|0|1481-preInit
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: txtTipo ">//GEN-BEGIN:|1481-getter|0|1481-preInit
     /**
-     * Returns an initialized instance of textField component.
+     * Returns an initialized instance of txtTipo component.
      *
      * @return the initialized component instance
      */
-    public TextField getTextField() {
-        if (textField == null) {
+    public TextField getTxtTipo() {
+        if (txtTipo == null) {
 //GEN-END:|1481-getter|0|1481-preInit
  // write pre-init user code here
-textField = new TextField("Tipo:", null, 32, TextField.ANY);//GEN-LINE:|1481-getter|1|1481-postInit
+txtTipo = new TextField("Tipo:", null, 32, TextField.ANY);//GEN-LINE:|1481-getter|1|1481-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1481-getter|2|
-        return textField;
+        return txtTipo;
     }
 //</editor-fold>//GEN-END:|1481-getter|2|
 
-//<editor-fold defaultstate="collapsed" desc=" Generated Getter: formGMT ">//GEN-BEGIN:|1470-getter|0|1470-preInit
-    /**
-     * Returns an initialized instance of formGMT component.
-     *
-     * @return the initialized component instance
-     */
-    public Form getFormGMT() {
-        if (formGMT == null) {
-//GEN-END:|1470-getter|0|1470-preInit
- // write pre-init user code here
-formGMT = new Form("form");//GEN-BEGIN:|1470-getter|1|1470-postInit
-            formGMT.addCommand(getOkCommand1());
-            formGMT.addCommand(getBackCommand1());
-            formGMT.setCommandListener(this);//GEN-END:|1470-getter|1|1470-postInit
- // write post-init user code here
-}//GEN-BEGIN:|1470-getter|2|
-        return formGMT;
-    }
-//</editor-fold>//GEN-END:|1470-getter|2|
+
 
 //<editor-fold defaultstate="collapsed" desc=" Generated Getter: okAdicionar ">//GEN-BEGIN:|1485-getter|0|1485-preInit
     /**
@@ -1670,7 +1721,7 @@ backCommand3 = new Command("Back", Command.BACK, 0);//GEN-LINE:|1502-getter|1|15
         if (listSeleccionados == null) {
 //GEN-END:|1482-getter|0|1482-preInit
  // write pre-init user code here
-listSeleccionados = new List("list", Choice.IMPLICIT);//GEN-BEGIN:|1482-getter|1|1482-postInit
+listSeleccionados = new List("Infracciones Seleccionadas", Choice.IMPLICIT);//GEN-BEGIN:|1482-getter|1|1482-postInit
             listSeleccionados.addCommand(getOkAdicionar());
             listSeleccionados.addCommand(getOkBorrar());
             listSeleccionados.addCommand(getBackCommand2());
@@ -1704,7 +1755,7 @@ String __selectedString = getListSeleccionados().getString(getListSeleccionados(
         if (list == null) {
 //GEN-END:|1492-getter|0|1492-preInit
  // write pre-init user code here
-list = new List("list", Choice.IMPLICIT);//GEN-BEGIN:|1492-getter|1|1492-postInit
+list = new List("Lista de Infracciones", Choice.IMPLICIT);//GEN-BEGIN:|1492-getter|1|1492-postInit
             list.addCommand(getOkCommand4());
             list.addCommand(getBackCommand3());
             list.setCommandListener(this);
@@ -1770,157 +1821,178 @@ form = new Form("form");//GEN-LINE:|1511-getter|1|1511-postInit
     }
 //</editor-fold>//GEN-END:|1511-getter|2|
 
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backInfraccion ">//GEN-BEGIN:|1519-getter|0|1519-preInit
+    /**
+     * Returns an initialized instance of backInfraccion component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getBackInfraccion() {
+        if (backInfraccion == null) {
+//GEN-END:|1519-getter|0|1519-preInit
+ // write pre-init user code here
+backInfraccion = new Command("Emitir Infraccion", Command.BACK, 0);//GEN-LINE:|1519-getter|1|1519-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1519-getter|2|
+        return backInfraccion;
+    }
+//</editor-fold>//GEN-END:|1519-getter|2|
 
-public void Imprimir(Factura factura)
-{
-     double monto = Double.parseDouble(factura.getAmount());
-                    imprimir = Printer.getInstance();
-                    switch (imprimir.getPaperStatus()) // check paper status
-			{
-			case Printer.PRINTER_EXIST_PAPER:
-				if (imprimir.voltageCheck()) // check voltage, if it is allowed to
-											// print
-				{
-                                    //Imprimiendo Factura
-                                    DeviceOps deviceOps = DeviceOps.getInstance();
-                                    imprimir.printBitmap(deviceOps.readImage("/1d.bmp", 0));
-//                                   
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    //Datos de la Empresa
-//                                    imprimir.printText(ConstruirFila("NIT:"+factura.getAccount().getNit()), 1);
-                                    imprimir.printText(ConstruirFila("FACTURA No."+factura.getInvoiceNumber()), 1);
-                                    imprimir.printText(ConstruirFila("AUTORIZACI\u00D3N No."+factura.getAccount().getNumAuto()), 1);
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    //Datos del cliente
-                                    imprimir.printText("FECHA:"+factura.getInvoiceDate(), 1);
-                                    imprimir.printText("NOMBRE:"+factura.getCliente().getName(), 1);
-                                    imprimir.printText("NIT/CI:"+factura.getCliente().getNit(), 1);
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    //invoice items
-                                    imprimir.printText(ConstruirFila("CANT.","CONCEPTO","TOTAL"), 1);
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-//                                    for(int i=0;i<listaProductos.size();i++)
-//                                    {   
-//                                       Products prod= (Products) listaProductos.elementAt(i);
-//                                       Tokenizer tk = new Tokenizer(Double.parseDouble(prod.getQty())+"","."); 
-//                                       String cantidad= tk.nextToken();
-//                                       String costo = ""+(Double.parseDouble(prod.getCost())*Double.parseDouble(prod.getQty()));
-//                                       String concepto = prod.getNotes();
-//                                       imprimir.printText(ConstruirFila(cantidad,concepto,costo), 1);
-//                                    }
-                                    String costo="";
-                                    for(int i =0;i<factura.getInvoiceItems().size();i++)
-                                    {
-                                        InvoiceItems invitem = (InvoiceItems) factura.getInvoiceItems().elementAt(i);
-                                        
-                                        Tokenizer tk = new Tokenizer(invitem.getQty(),".");
-                                        
-                                        String cantidad= tk.nextToken();
-                                        costo = ""+(Double.parseDouble(invitem.getCost())*Double.parseDouble(invitem.getQty()));
-                                        String concepto = invitem.getNotes();
-                                        imprimir.printText(ConstruirFila(cantidad,concepto,costo), 1);
-                                    }
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                                                       
-                                    imprimir.printText("MONTO TOTAL: Bs "+costo,1);
-                                    imprimir.printText("SON:"+NumeroLiteral(""+monto)+"Bolivianos",1);
-                                    imprimir.printText("C\u00D3DIGO DE CONTROL:"+factura.getControlCode(),1);
-                                    imprimir.printText("FECHA LIMITE EMISI\u00D3N:"+factura.getAccount().getFechaLimite(),1);
-//                                    imprimir.printText("CSD:"+operador.getId()+" "+operador.getUsuario() +"-"+factura.getDatecom(), 1);
-                                    imprimir.printText("CSD:143 farbo-18:"+DateUtil.getCurrentDate(), 1);
-//                                    ImprimirQr(factura);
-                                    imprimir.printBitmap(deviceOps.readImage("/FAC3.bmp", 0));
-//                                    if(!txtBoxNota.getString().equals(""))
-//                                    {
-//                                        imprimir.printText("Nota:"+txtBoxNota.getString(),1);
-//                                    }
-                                    imprimir.printEndLine();
-                                    //imprimir.printText("Fecha:"+factura.getFechaEmision()+"         Id:"+operador.getUsuario(), 1);
-                                    //imprimir.printText(ConstruirFila("Fecha:"+factura.getFechaEmision(),"Id:"+operador.getId()),1);
-                                    //imprimir.printTextWidthHeightZoom("Tel.No.:"+factura.getInstancia(),2, 1);
-                                    
-                                    
-                                    
-                                    
-                                    
-                                   
-                                    //imprimir.printText(ConstruirFila(factura.getConcepto(),"Bs."+factura.getMonto()), 1);
-                                    
-                                    //imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    
-                                    //imprimir.printText(ConstruirFila("Total Bs.:",factura.getMonto()), 1);
-                                    
-                                    
-                                    
-                                    
-				} else {
-					tickerLogin.setText("Bateria baja!! ");
-				
-				}
-				break;
-			case Printer.PRINTER_NO_PAPER:
-                                tickerLogin.setText("Verifique el estado del papel!! ");
-				break;
-			case Printer.PRINTER_PAPER_ERROR:
-                                tickerLogin.setText("Error de impresión!! ");
-				break;
-			}
-                   
-}
-//public void Imprimir(Infraccion_1 infraccion,Inf infcon, byte[] ImagenQr)
-//{
-////     double monto = Double.parseDouble(factura.getAmount());
-//                    imprimir = Printer.getInstance();
-//                    switch (imprimir.getPaperStatus()) // check paper status
-//			{
-//			case Printer.PRINTER_EXIST_PAPER:
-//				if (imprimir.voltageCheck()) // check voltage, if it is allowed to
-//											// print
-//				{
-//                                    //Imprimiendo Factura
-//                                    DeviceOps deviceOps = DeviceOps.getInstance();
-//                                    imprimir.printBitmap(deviceOps.readImage("/FAC_ALE.bmp", 0));
-////                                 
-//                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-//
-////                                    numMemo++;
-////                                    imprimir.printText(ConstruirFila(" MEMORANDUM No. "+infraccion.getNumeroInfraccion()), 1);
-////                                   imprimir.printText(ConstruirFila(" MEMORANDUM No. "+numMemo), 1);
-//                                   imprimir.printText("Fecha:"+DateUtil.getCurrentDate()+" "+DateUtil.getHour()+":"+DateUtil.getMinute(), 1);
-//
-//                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-//                                 
-//                                    imprimir.printText("PLACA:"+infcon.getPlacaLit()+" "+infcon.getPlacaNum(), 1);
-//                                    imprimir.printText("VIA:"+infcon.getVia(), 1);
-//                                    imprimir.printText("CODIGO DE INFRACCION:"+infcon.getInf1(), 1);
-//                                    
-//                                    imprimir.printText("CODIGO DE AGRAVANTE:"+infcon.getCodGrav(), 1);
-////                                    imprimir.printText("MONTO:"+infraccion.getMontoInfraccion(), 1);
-//                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-//                                 
-//                                    imprimir.printBitmap(ImagenQr);
-//                                    imprimir.printText("USUARIO:"+autentificacion.getNombre(),1);
-////                                   
-//                                    imprimir.printEndLine();
-//                       
-//                                    
-//                                    
-//                                    
-//				} else {
-//					tickerLogin.setText("Bateria baja!! ");
-//				
-//				}
-//				break;
-//			case Printer.PRINTER_NO_PAPER:
-//                                tickerLogin.setText("Verifique el estado del papel!! ");
-//				break;
-//			case Printer.PRINTER_PAPER_ERROR:
-//                                tickerLogin.setText("Error de impresión!! ");
-//				break;
-//			}
-//                   
-//}
-public void Imprimir(Inf infcon)
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand3 ">//GEN-BEGIN:|1522-getter|0|1522-preInit
+    /**
+     * Returns an initialized instance of okCommand3 component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getOkCommand3() {
+        if (okCommand3 == null) {
+//GEN-END:|1522-getter|0|1522-preInit
+ // write pre-init user code here
+okCommand3 = new Command("Atras", Command.OK, 0);//GEN-LINE:|1522-getter|1|1522-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1522-getter|2|
+        return okCommand3;
+    }
+//</editor-fold>//GEN-END:|1522-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: okCommand5 ">//GEN-BEGIN:|1529-getter|0|1529-preInit
+    /**
+     * Returns an initialized instance of okCommand5 component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getOkCommand5() {
+        if (okCommand5 == null) {
+//GEN-END:|1529-getter|0|1529-preInit
+ // write pre-init user code here
+okCommand5 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1529-getter|1|1529-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1529-getter|2|
+        return okCommand5;
+    }
+//</editor-fold>//GEN-END:|1529-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: listPrincipal ">//GEN-BEGIN:|1525-getter|0|1525-preInit
+    /**
+     * Returns an initialized instance of listPrincipal component.
+     *
+     * @return the initialized component instance
+     */
+    public List getListPrincipal() {
+        if (listPrincipal == null) {
+//GEN-END:|1525-getter|0|1525-preInit
+ // write pre-init user code here
+listPrincipal = new List("Infracciones v 0.1", Choice.IMPLICIT);//GEN-BEGIN:|1525-getter|1|1525-postInit
+            listPrincipal.append("Nueva Infraccion", getImage16());
+            listPrincipal.addCommand(getOkCommand5());
+            listPrincipal.addCommand(getBackCommand4());
+            listPrincipal.setCommandListener(this);
+            listPrincipal.setSelectedFlags(new boolean[]{false});//GEN-END:|1525-getter|1|1525-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1525-getter|2|
+        return listPrincipal;
+    }
+//</editor-fold>//GEN-END:|1525-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Method: listPrincipalAction ">//GEN-BEGIN:|1525-action|0|1525-preAction
+    /**
+     * Performs an action assigned to the selected list element in the
+     * listPrincipal component.
+     */
+    public void listPrincipalAction() {
+//GEN-END:|1525-action|0|1525-preAction
+ // enter pre-action user code here
+String __selectedString = getListPrincipal().getString(getListPrincipal().getSelectedIndex());//GEN-BEGIN:|1525-action|1|1528-preAction
+        if (__selectedString != null) {
+            if (__selectedString.equals("Nueva Infraccion")) {//GEN-END:|1525-action|1|1528-preAction
+ // write pre-action user code here
+switchDisplayable(null, getListMenu());//GEN-LINE:|1525-action|2|1528-postAction
+ // write post-action user code here
+    nuevaInfraccion();
+            }//GEN-BEGIN:|1525-action|3|1525-postAction
+        }//GEN-END:|1525-action|3|1525-postAction
+ // enter post-action user code here
+}//GEN-BEGIN:|1525-action|4|
+//</editor-fold>//GEN-END:|1525-action|4|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: backCommand4 ">//GEN-BEGIN:|1533-getter|0|1533-preInit
+    /**
+     * Returns an initialized instance of backCommand4 component.
+     *
+     * @return the initialized component instance
+     */
+    public Command getBackCommand4() {
+        if (backCommand4 == null) {
+//GEN-END:|1533-getter|0|1533-preInit
+ // write pre-init user code here
+backCommand4 = new Command("Cerrar Sesion", Command.BACK, 0);//GEN-LINE:|1533-getter|1|1533-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1533-getter|2|
+        return backCommand4;
+    }
+//</editor-fold>//GEN-END:|1533-getter|2|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: image16 ">//GEN-BEGIN:|1536-getter|0|1536-preInit
+    /**
+     * Returns an initialized instance of image16 component.
+     *
+     * @return the initialized component instance
+     */
+    public Image getImage16() {
+        if (image16 == null) {//GEN-END:|1536-getter|0|1536-preInit
+ // write pre-init user code here
+try {//GEN-BEGIN:|1536-getter|1|1536-@java.io.IOException
+                image16 = Image.createImage("/produtoIpx.png");
+            } catch (java.io.IOException e) {//GEN-END:|1536-getter|1|1536-@java.io.IOException
+    e.printStackTrace();}//GEN-LINE:|1536-getter|2|1536-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1536-getter|3|
+        return image16;
+    }
+//</editor-fold>//GEN-END:|1536-getter|3|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: image17 ">//GEN-BEGIN:|1537-getter|0|1537-preInit
+    /**
+     * Returns an initialized instance of image17 component.
+     *
+     * @return the initialized component instance
+     */
+    public Image getImage17() {
+        if (image17 == null) {//GEN-END:|1537-getter|0|1537-preInit
+ // write pre-init user code here
+try {//GEN-BEGIN:|1537-getter|1|1537-@java.io.IOException
+                image17 = Image.createImage("/clienteIpx.png");
+            } catch (java.io.IOException e) {//GEN-END:|1537-getter|1|1537-@java.io.IOException
+    e.printStackTrace();}//GEN-LINE:|1537-getter|2|1537-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1537-getter|3|
+        return image17;
+    }
+//</editor-fold>//GEN-END:|1537-getter|3|
+
+//<editor-fold defaultstate="collapsed" desc=" Generated Getter: image18 ">//GEN-BEGIN:|1538-getter|0|1538-preInit
+    /**
+     * Returns an initialized instance of image18 component.
+     *
+     * @return the initialized component instance
+     */
+    public Image getImage18() {
+        if (image18 == null) {//GEN-END:|1538-getter|0|1538-preInit
+ // write pre-init user code here
+try {//GEN-BEGIN:|1538-getter|1|1538-@java.io.IOException
+                image18 = Image.createImage("/facturaIpx.png");
+            } catch (java.io.IOException e) {//GEN-END:|1538-getter|1|1538-@java.io.IOException
+    e.printStackTrace();}//GEN-LINE:|1538-getter|2|1538-postInit
+ // write post-init user code here
+}//GEN-BEGIN:|1538-getter|3|
+        return image18;
+    }
+//</editor-fold>//GEN-END:|1538-getter|3|
+
+
+
+
+public void Imprimir(Boleta boleta)
 {
 //     double monto = Double.parseDouble(factura.getAmount());
                     imprimir = Printer.getInstance();
@@ -1945,8 +2017,10 @@ public void Imprimir(Inf infcon)
 //                                    imprimir.printText(ConstruirFila("NIT:"+factura.getAccount().getNit()), 1);
 //                                    numMemo++;
 //                                    imprimir.printText(ConstruirFila(" MEMORANDUM No. "+infraccion.getNumeroInfraccion()), 1);
-                                    imprimir.printText(ConstruirFila(" MEMORANDUM No. 1"),1);
-//                                   imprimir.printText("Fecha:"+DateUtil.getCurrentDate()+" "+DateUtil.getHour()+":"+DateUtil.getMinute(), 1);
+                                    imprimir.printText(ConstruirFila(" MEMORANDUM DE INFRACCION"),1);
+                                    imprimir.printText(ConstruirFila(" Nro. "+boleta.getCorrelativo()),1);
+                                    imprimir.printText(usuario.getCalle()+"-"+usuario.getZona(),1);
+                                    imprimir.printText("Fecha:"+DateUtil.getCurrentDate()+" "+DateUtil.getHour()+":"+DateUtil.getMinute(), 1);
 //                                    imprimir.printText(usuario, z);
                                     imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
                                     //Datos del cliente
@@ -1956,12 +2030,25 @@ public void Imprimir(Inf infcon)
 //                                    if(!infraccion.getRuta().equals("")){
 //                                        imprimir.printText("RUTA:"+infraccion.getRuta(), 1);
 //                                    }
-                                    imprimir.printText("PLACA:"+infcon.getPlacaLit()+" "+infcon.getPlacaNum(), 1);
-                                    imprimir.printText("VIA:"+infcon.getVia(), 1);
-                                    imprimir.printText("CODIGO DE INFRACCION:"+infcon.getInf1(), 1);
-                                    
-                                    imprimir.printText("CODIGO DE AGRAVANTE:"+infcon.getCodGrav(), 1);
+                                    imprimir.printText(boleta.getPlaca(), 2);
+                                    imprimir.printText(boleta.getTipo() +" "+boleta.getColor(), 1);
                                     imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
+                                    
+                                    imprimir.printText("OPERADOR: "+boleta.getOperador(), 1);
+                                    imprimir.printText("RUTA: "+boleta.getRuta(), 1);
+                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
+                                    
+                                    imprimir.printText("CONDUCTOR: "+boleta.getConductor(), 1);
+                                    imprimir.printText("CI: "+boleta.getCi(), 1);
+                                     imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
+                                    for(int i=0;i<boleta.getInfracciones().size();i++)
+                                    {
+                                        Infraccion inf = (Infraccion) boleta.getInfracciones().elementAt(i);
+                                        imprimir.printText(inf.getCodigo()+" "+inf.getMonto(), 1);
+                                    }
+                                    imprimir.printText("TOTAL: "+boleta.getMonto_total(), 1);
+                                    imprimir.printText("GMT: "+usuario.getNombres()+" "+usuario.getPaterno()+" "+usuario.getMaterno(), 1);
+                                    
 //                                    //invoice items
 ////                                    imprimir.printBitmap(ImagenQr);
 //                                    imprimir.printText("USUARIO:"+autentificacion.getNombre(),1);
@@ -1987,149 +2074,8 @@ public void Imprimir(Inf infcon)
 			}
                    
 }
- public void Imprimir(Factura factura, byte[] ImagenQr)
-    {
-     double monto = Double.parseDouble(factura.getAmount());
-                    imprimir = Printer.getInstance();
-                    switch (imprimir.getPaperStatus()) // check paper status
-			{
-			case Printer.PRINTER_EXIST_PAPER:
-				if (imprimir.voltageCheck()) // check voltage, if it is allowed to
-											// print
-				{
-                                    //Imprimiendo Factura
-                                    DeviceOps deviceOps = DeviceOps.getInstance();
-                                    imprimir.printBitmap(deviceOps.readImage("/FAC1.bmp", 0));
-//                                    //imprimir.printBitmap(deviceOps.readImage("/viva.bmp", 0));
-                                    //Encabezado 
-                                    
-//                                    imprimir.printTextWidthHeightZoom(ConstruirFilaA(factura.getAccount().getName()), 2, 1);
-//                                    imprimir.printText(ConstruirFila(factura.getAccount().getAddress1()), 1);
-//                                    imprimir.printText(ConstruirFila(factura.getAccount().getAddress2()), 1);
-//                                    imprimir.printText(ConstruirFila("SFC-001"), 1);
-//                                    imprimir.printText(ConstruirFila("FACTURA"), 1);
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    //Datos de la Empresa
-//                                    imprimir.printText(ConstruirFila("NIT:"+factura.getAccount().getNit()), 1);
-                                    imprimir.printText(ConstruirFila("FACTURA No."+factura.getInvoiceNumber()), 1);
-                                    imprimir.printText(ConstruirFila("AUTORIZACI\u00D3N No."+factura.getAccount().getNumAuto()), 1);
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    //Datos del cliente
-                                    imprimir.printText("FECHA:"+factura.getInvoiceDate(), 1);
-                                    imprimir.printText("NOMBRE:"+factura.getCliente().getName(), 1);
-                                    imprimir.printText("NIT/CI:"+factura.getCliente().getNit(), 1);
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    //invoice items
-                                    imprimir.printText(ConstruirFila("CANT.","CONCEPTO","TOTAL"), 1);
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    for(int i=0;i<listaProductos.size();i++)
-                                    {   
-                                       Products prod= (Products) listaProductos.elementAt(i);
-                                       Tokenizer tk = new Tokenizer(Double.parseDouble(prod.getQty())+"","."); 
-                                       String cantidad= tk.nextToken();
-                                       String costo = ""+(Double.parseDouble(prod.getCost())*Double.parseDouble(prod.getQty()));
-                                       String concepto = prod.getNotes();
-                                       imprimir.printText(ConstruirFila(cantidad,concepto,costo), 1);
-                                    }
-//                                    for(int i =0;i<factura.getInvoiceItems().size();i++)
-//                                    {
-//                                        InvoiceItems invitem = (InvoiceItems) factura.getInvoiceItems().elementAt(i);
-//                                        
-//                                        String cantidad= tk.nextToken();
-//                                        String costo = ""+(Double.parseDouble(invitem.getCost())*Double.parseDouble(invitem.getQty()));
-//                                        String concepto = invitem.getNotes();
-//                                        imprimir.printText(ConstruirFila(cantidad,concepto,costo), 1);
-//                                    }
-                                    imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                                                       
-                                    imprimir.printText("MONTO TOTAL: Bs "+Double.parseDouble(factura.getAmount()),1);
-                                    imprimir.printText("SON:"+NumeroLiteral(""+monto)+"Bolivianos",1);
-                                    imprimir.printText("C\u00D3DIGO DE CONTROL:"+factura.getControlCode(),1);
-                                    imprimir.printText("FECHA LIMITE EMISI\u00D3N:"+factura.getAccount().getFechaLimite(),1);
-                                    imprimir.printBitmap(ImagenQr);
-//                                    imprimir.printText("CSD:"+operador.getId()+" "+operador.getUsuario() +"-"+factura.getDatecom(), 1);
-//                                    imprimir.printText("CSD:143 farbo-18:00:35", 1);
-//                                    BmpArray ba = new BmpArray();
-//                                    try { 
-//                                        imprimir.printBitmap(ba.readImage(BMPGenerator.encodeBMP(ImagenQr)));
-//                                    } catch (IOException ex) {
-//                                        ex.printStackTrace();
-//                                    }
-//                                    imprimir.printBitmap(deviceOps.readImage("/FAC3.bmp", 0));
-//                                    if(!txtBoxNota.getString().equals(""))
-//                                    {
-//                                        imprimir.printText("Nota:"+txtBoxNota.getString(),1);
-//                                    }
-                                    imprimir.printEndLine();
-                                    //imprimir.printText("Fecha:"+factura.getFechaEmision()+"         Id:"+operador.getUsuario(), 1);
-                                    //imprimir.printText(ConstruirFila("Fecha:"+factura.getFechaEmision(),"Id:"+operador.getId()),1);
-                                    //imprimir.printTextWidthHeightZoom("Tel.No.:"+factura.getInstancia(),2, 1);
-                                    
-                                    
-                                    
-                                    
-                                    
-                                   
-                                    //imprimir.printText(ConstruirFila(factura.getConcepto(),"Bs."+factura.getMonto()), 1);
-                                    
-                                    //imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    
-                                    //imprimir.printText(ConstruirFila("Total Bs.:",factura.getMonto()), 1);
-                                    
-                                    
-                                    
-                                    
-				} else {
-					tickerLogin.setText("Bateria baja!! ");
-				
-				}
-				break;
-			case Printer.PRINTER_NO_PAPER:
-                                tickerLogin.setText("Verifique el estado del papel!! ");
-				break;
-			case Printer.PRINTER_PAPER_ERROR:
-                                tickerLogin.setText("Error de impresión!! ");
-				break;
-			}
-                   
-    }
-    private double redondeo(double num,int numDecim){
-        long p=1;
-        for(int i=0; i<numDecim; i++)p*=10;
-        return (double)(int)(p * num + 0.5) / p;
-    }
-    public String NumeroLiteral(String n)
-    {
-       int coma =0;
-       for(int i=0;i<n.length();i++)
-       {
-           if(n.substring(i,i+1).equals(","))
-           {
-              coma=1;
-           }
-           if(n.substring(i,i+1).equals("."))
-           {
-              coma=2;
-           }
-       }
-       int j=0;
-       if(coma==0)
-       {
-           n=n+",00";
-           coma=1;
-       }
-       if (coma==1)
-       {
-           j= n.indexOf(",");
-       }
-       if(coma ==2)
-       {
-           j = n.indexOf(".");
-       }
-      
-       return Numero_a_Letra.readNumber(n.substring(0,j),n.substring(j+1,n.length())).toUpperCase();
-      
-    }
+ 
+    
     /*
      * Parametros Cad1:  
      * Se contruye una fila con 32 caracteres y la variable Cad1 centrado
@@ -2260,20 +2206,7 @@ public void Imprimir(Inf infcon)
     }
     public void destroyApp(boolean unconditional)throws MIDletStateChangeException
     {
-        try {
-			this.storage.save( this.vectorUsuarios, "Usuarios");
-		} catch (IOException e) {
-			
-			System.out.println("no se pudo guardar los datos de los usuarios" + e );
-		}
-         try {
-			this.storage.save( this.vectorColores, "Colores");
-                        this.storage.save( this.vectorVehiculo, "Vehiculos");
-                        this.storage.save( this.vectorZona, "Zonas");
-                    } catch (IOException e) {
-			
-			System.out.println("no se pudo registrar las listas " + e );
-                    }
+       
     }
 
     public static String convertiraISO(String s) {
@@ -2304,10 +2237,10 @@ public void Imprimir(Inf infcon)
         switch(pantalla)
         {
             case AUTENTIFICACION:
-                switchDisplayable(null,getFormGMT());
+                switchDisplayable(null,getListPrincipal());
                 break;
              case REGISTRARINFRACCION:
-                    switchDisplayable(null,getListMenu());
+                    switchDisplayable(null,getListPrincipal());
                     break;
 //            
         }
@@ -2322,34 +2255,9 @@ public void Imprimir(Inf infcon)
                 break;
             
             case REGISTRARINFRACCION:
+                switchDisplayable(null,getListMenu());
 //                    switchDisplayable(null,getFormInfraccion());
                     break;
-//            case CLIENTE:
-//                switchDisplayable(null,getFormCliente());
-//                break;    
-//            case GUARDARFACTURA:
-//                switchDisplayable(null, getFormFactura());
-//                break;    
-//            case CANTPROD:
-//                switchDisplayable(null,getFormCantidad());
-//                break;
-//            case REGISTRARCLIENTE:
-//                if(estaRegistrado)
-//                {
-//                    switchDisplayable(null,getListMenu());
-//                }
-//                else
-//                {
-//                    switchDisplayable(null,getFormRegistro());
-//                }
-//                
-//                break;
-//            case PRERECARGA:
-//                 switchDisplayable(null,getAppMenu());
-//                break;
-//            case RECARGA:
-//                  switchDisplayable(null,getFormPrerecarga());
-//                break;
                 
         }
     }   
@@ -2358,11 +2266,7 @@ public void Imprimir(Inf infcon)
       switch(pantalla)
       {
           case AUTENTIFICACION:
-          case CLIENTE:
-          case GUARDARFACTURA:
-          case VERSION:
-          case PRERECARGA:
-          case RECARGA:
+        
           case REGISTRARINFRACCION:
                switch(rest.getCodigoRespuesta())
                 {
@@ -2379,49 +2283,7 @@ public void Imprimir(Inf infcon)
                         break;
                 }
               break;
-          case CANTPROD:
-              titulo= "Casilla de Texto Vacia";
-              break;
-           case REGISTRARCLIENTE:
-                    if(estaRegistrado)
-                    {
-                        titulo ="Registro Exitoso";
-                    }
-                    else
-                    {
-                        switch(rest.getCodigoRespuesta())
-                        {
-                            case 401:
-                                titulo= "Verifique que el Usuario y Password sean CORRECTOS";
-                                break;
-                            case 404:
-                                titulo= "Se perdio la coneccion con el servidor";
-                                break;
-                            case 500:
-                                titulo= " Conflictos internos con el servidor";
-                                break;
-
-                        }
-                    }
-                 break;
-           case CONSULTA:
-           case CONSULTAUSUARIOS:
-               switch(rest.getCodigoRespuesta())
-                {
-                    case 401:
-                        titulo= "Autentificacion Fallida";
-                        break;
-                    case 404:
-                        titulo= "Problemas de Conectividad";
-                        break;
-                    case 500:
-                        titulo ="Error del Servidor";
-                        break;  
-                    case 200:
-                        titulo = "Informacion Actualizada";
-                        break;
-                }
-              break;
+         
          
       }
        
@@ -2432,10 +2294,6 @@ public void Imprimir(Inf infcon)
         switch(pantalla)
         {
             case AUTENTIFICACION:
-            case CLIENTE:
-            case GUARDARFACTURA:
-            case VERSION:
-            case RECARGA:
             case REGISTRARINFRACCION:
             
                 switch(rest.getCodigoRespuesta())
@@ -2455,54 +2313,6 @@ public void Imprimir(Inf infcon)
                 }
                 
                 break;
-            case CANTPROD:
-                 mensaje="Por favor ingrese la cantidad del producto";
-                 break;
-            case REGISTRARCLIENTE:
-                    if(estaRegistrado)
-                    {
-                        mensaje =" El usuario se registro CORRECTAMENTE";
-                    }
-                    else
-                    {
-                        switch(rest.getCodigoRespuesta())
-                        {
-                            case 401:
-                                mensaje= "Verifique que el Usuario y Password sean CORRECTOS";
-                                break;
-                            case 404:
-                                mensaje= "Se perdio la coneccion con el servidor";
-                                break;
-                            case 500:
-                                mensaje="Conflictos internos con el servidor";
-                                break;
-
-                        }
-                    }
-                 break;
-            case PRERECARGA:
-                mensaje="Verifique si los datos son correctos";
-                break;
-            case CONSULTA:
-            case CONSULTAUSUARIOS:
-                 switch(rest.getCodigoRespuesta())
-                {
-                    case 401:
-                        mensaje= "Verifique que el Usuario y Password sean CORRECTOS";
-                        break;
-                    case 404:
-                        mensaje= "Se perdio la coneccion con el servidor";
-                        break;
-                    case 500:
-                        mensaje="Conflictos internos con el servidor";
-                        break;
-                    case 200:
-                        mensaje="Se Actualizo la informacion correctamente.";
-
-                }
-                
-                break;
-           
         }
         
         return this.mensaje;
@@ -2562,12 +2372,6 @@ public void Imprimir(Inf infcon)
 //            String datos = "4771553|Guisbert S.R.L.|0014|554574757414|12/03/2014|500|57-38-4F-ED|01/06/2014|APLP|123456798";
             String datos =factura.getAccount().getNit()+"|"+factura.getAccount().getName()+"|"+factura.getInvoiceNumber()+"|"+factura.getAccount().getNumAuto()+"|"+factura.getInvoiceDate()+"|"+factura.getControlCode()+"|"+factura.getAccount().getFechaLimite()+"|"+factura.getCliente().getName()+"|"+factura.getCliente().getNit();
             qrCodeImage = encode(datos);
-            
-//            Image imagen=Image.createImage("/generadorqr/f.png");
-            
-            
-            
-//            
             
             System.out.println("ancho"+qrCodeImage.getWidth());
             System.out.println("alto"+qrCodeImage.getWidth());
@@ -2712,15 +2516,7 @@ public void Imprimir(Inf infcon)
         }
         
     }
-//    public void NuevaFactura()
-//    {
-//        listaProductos.removeAllElements();
-//        listLugar.deleteAll();
-//        cliente = null;
-//        factura =null;
-//        
-//       
-//    }
+
    public Vector getListaInfracciones()
    {
        if(listaInfracciones==null)
@@ -2729,7 +2525,12 @@ public void Imprimir(Inf infcon)
        }
        return listaInfracciones;
    }
-    
+    public void nuevaInfraccion()
+    {
+        infractor = null;
+        getListaInfracciones().removeAllElements();
+        getListSeleccionados().deleteAll();
+    }
     public void Limpiar()
     {
             

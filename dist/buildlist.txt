@@ -36,3 +36,29 @@ Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
 
 Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
 
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+
+Generic/AnyPhone_320x240	es_419	AppGM.jar	AppGM.jad	-	320x240xnull
+

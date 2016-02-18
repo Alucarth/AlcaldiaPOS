@@ -22,6 +22,7 @@ import org.json.me.JSONObject;
 public class Infraccion {
     private String codigo;
     private String agrabante;
+    private String monto;
     
     public static Infraccion fromjson(String jsonText)
     {
@@ -32,6 +33,10 @@ public class Infraccion {
             if(json.has("inf_codigo"))
             {
                 infraccion.setCodigo(json.getString("inf_codigo"));
+            }
+            if(json.has("monto"))
+            {
+                infraccion.setMonto(json.getString("monto"));
             }
             
         } catch (JSONException ex) {
@@ -73,6 +78,14 @@ public class Infraccion {
 
     public void setAgrabante(String agrabante) {
         this.agrabante = agrabante;
+    }
+
+    public String getMonto() {
+        return monto;
+    }
+
+    public void setMonto(String monto) {
+        this.monto = monto;
     }
     
    
