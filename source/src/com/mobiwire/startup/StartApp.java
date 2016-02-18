@@ -126,15 +126,15 @@ public class StartApp extends MIDlet implements CommandListener {
     private Command backCommand2;
     private Command okAdicionar;
     private Command back;
+    private Command okCommand3;
+    private Command backCommand4;
+    private Command okCommand5;
+    private Command backInfraccion;
     private Command okCommand2;
     private Command okMenu;
     private Command exitCommand1;
     private Command okCommand;
     private Command backCommand;
-    private Command backInfraccion;
-    private Command okCommand3;
-    private Command okCommand5;
-    private Command backCommand4;
     private SplashScreen splashScreen;
     private Form formLogin;
     private TextField textField9;
@@ -142,6 +142,7 @@ public class StartApp extends MIDlet implements CommandListener {
     private List list;
     private Form formLoading;
     private List listSeleccionados;
+    private List listPrincipal;
     private Form form;
     private List listMenu;
     private Form formInfractor;
@@ -150,13 +151,15 @@ public class StartApp extends MIDlet implements CommandListener {
     private TextField txtTipo;
     private TextField txtCI;
     private Alert Problemas;
-    private List listPrincipal;
     private Image image;
     private Ticker ticker;
     private SimpleCancellableTask task1;
     private Image image9;
     private SimpleCancellableTask task;
     private Image image8;
+    private Image image16;
+    private Image image17;
+    private Image image18;
     private Image image13;
     private Image image14;
     private Image image15;
@@ -174,9 +177,6 @@ public class StartApp extends MIDlet implements CommandListener {
     private Font font;
     private Image image6;
     private Image image7;
-    private Image image16;
-    private Image image17;
-    private Image image18;
 //</editor-fold>//GEN-END:|fields|0|
 
     //SMS ENVIO
@@ -1248,7 +1248,7 @@ textField9 = new TextField("Usuario:", null, 32, TextField.ANY);//GEN-LINE:|1397
         if (textField10 == null) {
 //GEN-END:|1398-getter|0|1398-preInit
  // write pre-init user code here
-textField10 = new TextField("Contrase\u00F1a:", null, 32, TextField.ANY | TextField.PASSWORD);//GEN-LINE:|1398-getter|1|1398-postInit
+textField10 = new TextField("Contrase\u00F1a:", null, 32, TextField.NUMERIC | TextField.PASSWORD);//GEN-LINE:|1398-getter|1|1398-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1398-getter|2|
         return textField10;
@@ -1400,6 +1400,12 @@ switchDisplayable (null, getListPrincipal ());//GEN-BEGIN:|1409-entry|1|1410-pos
                        Log.i("metho Infraccion", "infracciones total "+usuario.getInfracciones().size());
 
                        Imprimir(boleta);
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
+                       Imprimir(boleta);
                         //guardando sucursal
                        
 
@@ -1444,7 +1450,7 @@ switchDisplayable (null, getListPrincipal ());//GEN-BEGIN:|1409-entry|1|1410-pos
         if (exitCommand1 == null) {
 //GEN-END:|1460-getter|0|1460-preInit
  // write pre-init user code here
-exitCommand1 = new Command("Exit", Command.EXIT, 0);//GEN-LINE:|1460-getter|1|1460-postInit
+exitCommand1 = new Command("Salir", Command.EXIT, 0);//GEN-LINE:|1460-getter|1|1460-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1460-getter|2|
         return exitCommand1;
@@ -1636,7 +1642,7 @@ okAdicionar = new Command("Adicionar Infraccion", Command.OK, 0);//GEN-LINE:|148
         if (backCommand2 == null) {
 //GEN-END:|1487-getter|0|1487-preInit
  // write pre-init user code here
-backCommand2 = new Command("Back", Command.BACK, 0);//GEN-LINE:|1487-getter|1|1487-postInit
+backCommand2 = new Command("Atras", Command.BACK, 0);//GEN-LINE:|1487-getter|1|1487-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1487-getter|2|
         return backCommand2;
@@ -1704,7 +1710,7 @@ cancelCommand = new Command("Cancel", Command.CANCEL, 0);//GEN-LINE:|1500-getter
         if (backCommand3 == null) {
 //GEN-END:|1502-getter|0|1502-preInit
  // write pre-init user code here
-backCommand3 = new Command("Back", Command.BACK, 0);//GEN-LINE:|1502-getter|1|1502-postInit
+backCommand3 = new Command("Atras", Command.BACK, 0);//GEN-LINE:|1502-getter|1|1502-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1502-getter|2|
         return backCommand3;
@@ -1883,7 +1889,7 @@ okCommand5 = new Command("Ok", Command.OK, 0);//GEN-LINE:|1529-getter|1|1529-pos
 //GEN-END:|1525-getter|0|1525-preInit
  // write pre-init user code here
 listPrincipal = new List("Infracciones v 0.1", Choice.IMPLICIT);//GEN-BEGIN:|1525-getter|1|1525-postInit
-            listPrincipal.append("Nueva Infraccion", getImage16());
+            listPrincipal.append("Nueva Infracci\u00F3n", getImage16());
             listPrincipal.addCommand(getOkCommand5());
             listPrincipal.addCommand(getBackCommand4());
             listPrincipal.setCommandListener(this);
@@ -1904,7 +1910,7 @@ listPrincipal = new List("Infracciones v 0.1", Choice.IMPLICIT);//GEN-BEGIN:|152
  // enter pre-action user code here
 String __selectedString = getListPrincipal().getString(getListPrincipal().getSelectedIndex());//GEN-BEGIN:|1525-action|1|1528-preAction
         if (__selectedString != null) {
-            if (__selectedString.equals("Nueva Infraccion")) {//GEN-END:|1525-action|1|1528-preAction
+            if (__selectedString.equals("Nueva Infracci\u00F3n")) {//GEN-END:|1525-action|1|1528-preAction
  // write pre-action user code here
 switchDisplayable(null, getListMenu());//GEN-LINE:|1525-action|2|1528-postAction
  // write post-action user code here
@@ -1939,12 +1945,13 @@ backCommand4 = new Command("Cerrar Sesion", Command.BACK, 0);//GEN-LINE:|1533-ge
      * @return the initialized component instance
      */
     public Image getImage16() {
-        if (image16 == null) {//GEN-END:|1536-getter|0|1536-preInit
+        if (image16 == null) {
+//GEN-END:|1536-getter|0|1536-preInit
  // write pre-init user code here
 try {//GEN-BEGIN:|1536-getter|1|1536-@java.io.IOException
                 image16 = Image.createImage("/produtoIpx.png");
             } catch (java.io.IOException e) {//GEN-END:|1536-getter|1|1536-@java.io.IOException
-    e.printStackTrace();}//GEN-LINE:|1536-getter|2|1536-postInit
+            }//GEN-LINE:|1536-getter|2|1536-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1536-getter|3|
         return image16;
@@ -1958,12 +1965,13 @@ try {//GEN-BEGIN:|1536-getter|1|1536-@java.io.IOException
      * @return the initialized component instance
      */
     public Image getImage17() {
-        if (image17 == null) {//GEN-END:|1537-getter|0|1537-preInit
+        if (image17 == null) {
+//GEN-END:|1537-getter|0|1537-preInit
  // write pre-init user code here
 try {//GEN-BEGIN:|1537-getter|1|1537-@java.io.IOException
                 image17 = Image.createImage("/clienteIpx.png");
             } catch (java.io.IOException e) {//GEN-END:|1537-getter|1|1537-@java.io.IOException
-    e.printStackTrace();}//GEN-LINE:|1537-getter|2|1537-postInit
+            }//GEN-LINE:|1537-getter|2|1537-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1537-getter|3|
         return image17;
@@ -1977,12 +1985,13 @@ try {//GEN-BEGIN:|1537-getter|1|1537-@java.io.IOException
      * @return the initialized component instance
      */
     public Image getImage18() {
-        if (image18 == null) {//GEN-END:|1538-getter|0|1538-preInit
+        if (image18 == null) {
+//GEN-END:|1538-getter|0|1538-preInit
  // write pre-init user code here
 try {//GEN-BEGIN:|1538-getter|1|1538-@java.io.IOException
                 image18 = Image.createImage("/facturaIpx.png");
             } catch (java.io.IOException e) {//GEN-END:|1538-getter|1|1538-@java.io.IOException
-    e.printStackTrace();}//GEN-LINE:|1538-getter|2|1538-postInit
+            }//GEN-LINE:|1538-getter|2|1538-postInit
  // write post-init user code here
 }//GEN-BEGIN:|1538-getter|3|
         return image18;
@@ -2005,23 +2014,14 @@ public void Imprimir(Boleta boleta)
                                     //Imprimiendo Factura
                                     DeviceOps deviceOps = DeviceOps.getInstance();
                                     imprimir.printBitmap(deviceOps.readImage("/FAC_ALE.bmp", 0));
-//                                    //imprimir.printBitmap(deviceOps.readImage("/viva.bmp", 0));
-                                    //Encabezado 
-//                                    imprimir.printTextWidthHeightZoom(ConstruirFilaA(factura.getAccount().getName()), 2, 1);
-//                                    imprimir.printText(ConstruirFila(factura.getAccount().getAddress1()), 1);
-//                                    imprimir.printText(ConstruirFila(factura.getAccount().getAddress2()), 1);
-//                                    imprimir.printText(ConstruirFila("SFC-001"), 1);
-//                                    imprimir.printText(ConstruirFila("FACTURA"), 1);
+
                                     imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
-                                    //Datos de la Empresa
-//                                    imprimir.printText(ConstruirFila("NIT:"+factura.getAccount().getNit()), 1);
-//                                    numMemo++;
-//                                    imprimir.printText(ConstruirFila(" MEMORANDUM No. "+infraccion.getNumeroInfraccion()), 1);
+
                                     imprimir.printText(ConstruirFila(" MEMORANDUM DE INFRACCION"),1);
-                                    imprimir.printText(ConstruirFila(" Nro. "+boleta.getCorrelativo()),1);
+                                    imprimir.printText(ConstruirFila(" Nro. "+boleta.getCorrelativo()),2);
                                     imprimir.printText(usuario.getCalle()+"-"+usuario.getZona(),1);
-                                    imprimir.printText("Fecha:"+DateUtil.getCurrentDate()+" "+DateUtil.getHour()+":"+DateUtil.getMinute(), 1);
-//                                    imprimir.printText(usuario, z);
+                                    imprimir.printText("Fecha: "+boleta.getFecha(), 1);
+
                                     imprimir.printBitmap(deviceOps.readImage("/linea.bmp", 0));
                                     //Datos del cliente
 //                                    if(!infraccion.getOperador().equals("")){
